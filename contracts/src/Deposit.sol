@@ -11,7 +11,7 @@ contract DepositModule {
     address private constant LENDING_POOL_ADDRESSES_PROVIDER = 0x0000000000000000000000000000000000000000; // Replace with the correct address
 
     // Mapping from token address to mapping of account balances
-    mapping(address => mapping(address => uint256)) private _balances;
+    mapping(address => uint256) private _balances;
 
     function deposit(address token, uint256 amount) external {
         // Transfer the tokens to this contract
@@ -24,21 +24,21 @@ contract DepositModule {
         ILendingPool(_getLendingPool()).deposit(token, amount, address(this), 0);
 
         // Update the balance
-        _balances[token][msg.sender] += amount;
+        _balances[msg.sender] += amount;
     }
 
     function withdraw(address token, uint256 amount) external {
-        require(_balances[token][msg.sender] >= amount, "Insufficient balance.");
+        require(_balances[msg.sender] >= amount, "Insufficient balance.");
 
         // Update the balance
-        _balances[token][msg.sender] -= amount;
+        _balances[msg.sender] -= amount;
 
         // Withdraw the tokens from the Aave Lending Pool
         ILendingPool(_getLendingPool()).withdraw(token, amount, msg.sender);
     }
 
     function balanceOf(address token, address account) external view returns (uint256) {
-        return _balances[token][account];
+        return _balances[account];
     }
 
     function _getLendingPool() private view returns (address) {

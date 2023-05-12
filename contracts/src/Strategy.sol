@@ -2,6 +2,9 @@
 pragma solidity ^0.8.13;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@uniswap/v3-core/contracts/interfaces/INonfungiblePositionManager.sol";
+import "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol";
+import "./Deposit.sol";
 
 contract StrategyRegistry {
     
@@ -23,6 +26,9 @@ contract StrategyRegistry {
     // Mapping from strategy ID to strategy
     mapping(uint256 => Strategy) strategies;
 
+    // mapping from asset id to the deposit module
+    mapping(address => address) depositModules;
+
     // Block numbers per epoch
     uint256 public constant BLOCKS_PER_EPOCH = 5000; // This value is an example and will depend on your use case
 
@@ -33,11 +39,12 @@ contract StrategyRegistry {
     ISwapRouter public swapRouter;
 
 
-
-    constructor(IERC20 _stakingToken, INonfungiblePositionManager _positionManager, ISwapRouter _swapRouter) {
+    // each asset has one strategy registry
+    constructor(IERC20 _stakingToken, INonfungiblePositionManager _positionManager, ISwapRouter _swapRouter, DepositModule _depositModule) {
         stakingToken = _stakingToken;
         positionManager = _positionManager;
         swapRouter = _swapRouter;
+        depositModule = _depositModule;
     }
 
     function registerStrategy(bytes32 hash, address asset, uint256 startBlock, uint256 endBlock, uint256 stake) external {
