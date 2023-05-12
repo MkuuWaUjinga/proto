@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.15;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@uniswap/v3-core/contracts/interfaces/INonfungiblePositionManager.sol";
-import "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol";
+import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
+import "v3-periphery/contracts/interfaces/INonfungiblePositionManager.sol";
+import "v3-periphery/contracts/interfaces/ISwapRouter.sol";
 import "./Deposit.sol";
 
 contract StrategyRegistry {

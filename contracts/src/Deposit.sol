@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.15;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@aave/protocol-v3/contracts/interfaces/ILendingPool.sol";
-import "@aave/protocol-v3/contracts/interfaces/ILendingPoolAddressesProvider.sol";
+import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
+import "aave-v3-core/contracts/interfaces/IPool.sol";
+import "aave-v3-core/contracts/interfaces/IPoolAddressesProvider.sol";
 
 contract DepositModule {
 
@@ -21,7 +21,7 @@ contract DepositModule {
         IERC20(token).approve(_getLendingPool(), amount);
 
         // Deposit the tokens into the Aave Lending Pool
-        ILendingPool(_getLendingPool()).deposit(token, amount, address(this), 0);
+        IPool(_getLendingPool()).deposit(token, amount, address(this), 0);
 
         // Update the balance
         _balances[msg.sender] += amount;
@@ -34,7 +34,7 @@ contract DepositModule {
         _balances[msg.sender] -= amount;
 
         // Withdraw the tokens from the Aave Lending Pool
-        ILendingPool(_getLendingPool()).withdraw(token, amount, msg.sender);
+        IPool(_getLendingPool()).withdraw(token, amount, msg.sender);
     }
 
     function balanceOf(address token, address account) external view returns (uint256) {
@@ -42,6 +42,6 @@ contract DepositModule {
     }
 
     function _getLendingPool() private view returns (address) {
-        return ILendingPoolAddressesProvider(LENDING_POOL_ADDRESSES_PROVIDER).getLendingPool();
+        return IPoolAddressesProvider(LENDING_POOL_ADDRESSES_PROVIDER).getLendingPool();
     }
 }
