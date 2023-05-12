@@ -26,8 +26,18 @@ contract StrategyRegistry {
     // Block numbers per epoch
     uint256 public constant BLOCKS_PER_EPOCH = 5000; // This value is an example and will depend on your use case
 
-    constructor(IERC20 _stakingToken) {
+    // Uniswap v3 Nonfungible Position Manager
+    INonfungiblePositionManager public positionManager;
+
+    // Uniswap v3 Swap Router
+    ISwapRouter public swapRouter;
+
+
+
+    constructor(IERC20 _stakingToken, INonfungiblePositionManager _positionManager, ISwapRouter _swapRouter) {
         stakingToken = _stakingToken;
+        positionManager = _positionManager;
+        swapRouter = _swapRouter;
     }
 
     function registerStrategy(bytes32 hash, address asset, uint256 startBlock, uint256 endBlock, uint256 stake) external {
@@ -65,4 +75,62 @@ contract StrategyRegistry {
     function getStrategyByID(uint256 strategyID) external view returns (Strategy memory) {
         return _strategyByID[strategyID];
     }
+
+    function runStrategy(uint256 strategyID) external {
+        Strategy memory strategy = strategies[strategyID];
+        require(msg.sender == strategy.creator, "Only the creator can run this strategy.");
+
+        // Add check to ensure that only strategies within the correct epoch can be run...
+
+        // Create a range order on Uniswap v3
+        INonfungiblePositionManager.MintParams memory params = INonfungiblePositionManager.MintParams({
+            token0: address(stakingToken),
+            token1: strategy.asset,
+            fee: 3000, // This will depend on your use case
+            tickLower: -887220, // This will depend on your use case
+            tickUpper: 887220, // This will depend on your use case
+            amount0Desired: strategy.stake,
+            amount1Desired: 0,
+            amount0Min: strategy.stake,
+            amount1Min: 0,
+            recipient: address(this),
+            deadline: block.timestamp + 15 minutes
+        });
+
+        // Transfer the required tokens to the Position Manager
+        stakingToken.approve(address(positionManager), strategy.stake);
+
+        // Mint the position
+        positionManager.mint(params);
+    }
+
+    function updateRange(uint256 tokenId, int24 newTickLower, int24 newTickUpper) external {
+        // Collect the maximum amount of tokens from the position
+        positionManager.collect({
+            tokenId: tokenId,
+            recipient: msg.sender,
+            amount0Max: type(uint128).max,
+            amount1Max: type(uint128).max
+        });
+
+        // Burn the NFT representing the position
+        positionManager.burn(tokenId);
+
+        // Add liquidity to the new range
+        positionManager.mint({
+            token0: token0,
+            token1: token1,
+            fee: fee,
+            tickLower: newTickLower,
+            tickUpper: newTickUpper,
+            amount0Desired: amount0Desired,
+            amount1Desired: amount1Desired,
+            amount0Min: amount0Min,
+            amount1Min: amount1Min,
+            recipient: msg.sender,
+            deadline: block.timestamp + 15 minutes
+        });
+    }   
+
+
 }
