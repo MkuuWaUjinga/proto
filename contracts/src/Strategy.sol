@@ -192,7 +192,7 @@ contract StrategyRegistry {
         Strategy memory strategy = strategies[strategyID];
         require(strategyRegisteredNodeRunner[strategyID][msg.sender], "pls register node to run this strategy.");
 
-        if(univ3TokenId != address(0)){
+        if(univ3TokenId != 0){
             
             // // collect fees
             // INonfungiblePositionManager.CollectParams memory params1 = INonfungiblePositionManager.CollectParams({
