@@ -19,9 +19,8 @@ export async function pinFileToIPFS(file: File) {
   const response = await axios.post(url, data, {
     maxContentLength: 100000000000000000,
     headers: {
-      ...data.getHeaders(),
-      pinata_api_key: "YOUR_PINATA_API_KEY",
-      pinata_secret_api_key: "YOUR_PINATA_SECRET_API_KEY",
+      pinata_api_key: pinataApiKey,
+      pinata_secret_api_key: pinataSecretApiKey,
     },
   });
   console.log("hji");

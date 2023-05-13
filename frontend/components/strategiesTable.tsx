@@ -1,5 +1,5 @@
-"use client"
-import React, {useState} from "react";
+"use client";
+import React, { useState } from "react";
 import {
   Box,
   Table,
@@ -10,8 +10,13 @@ import {
   Td,
   useDisclosure,
   Button,
+  IconButton,
+  Icon,
+  Text,
 } from "@chakra-ui/react";
 import DepositModal from "./depositModal";
+import { AddIcon } from "@chakra-ui/icons";
+import NewStratModal from "./NewStratModal";
 
 interface Strategy {
   id: number;
@@ -26,7 +31,10 @@ interface StrategiesTableProps {
 
 const StrategiesTable: React.FC<StrategiesTableProps> = ({ strategies }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [selectedStrategy, setSelectedStrategy] = useState<Strategy | null>(null);
+  const createStartModal = useDisclosure();
+  const [selectedStrategy, setSelectedStrategy] = useState<Strategy | null>(
+    null
+  );
 
   const handleDepositClick = (strategy: Strategy) => {
     setSelectedStrategy(strategy);
@@ -74,6 +82,19 @@ const StrategiesTable: React.FC<StrategiesTableProps> = ({ strategies }) => {
           }}
         />
       )}
+      <Box justifyContent={"center"} display={"flex"} m={"5"}>
+        <Button
+          leftIcon={<AddIcon />}
+          variant="solid"
+          onClick={createStartModal.onOpen}
+        >
+          Add new strategy
+        </Button>
+      </Box>
+      <NewStratModal
+        isOpen={createStartModal.isOpen}
+        onClose={createStartModal.onClose}
+      />
     </Box>
   );
 };

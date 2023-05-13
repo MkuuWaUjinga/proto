@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import * as React from "react";
 import {
   Box,
@@ -41,27 +41,7 @@ const Navbar: React.FC<NavbarProps> = () => {
         justifyContent="space-between"
         alignItems="center"
         padding="1rem"
-      >
-        <Box display={{ base: "none", md: "flex" }} alignItems="center">
-          {/* Swap Menu */}
-          <Link
-            as={Link}
-            textDecoration="none"
-            color={textColor}
-            padding="0.5rem"
-          >
-            Swap
-          </Link>
-          <Link
-            as={Link}
-            textDecoration="none"
-            color={textColor}
-            padding="0.5rem"
-          >
-            Tokens
-          </Link>
-        </Box>
-      </Flex>
+      ></Flex>
 
       <Box display="flex" alignItems="center">
         {/* Dark Mode Toggle Button */}

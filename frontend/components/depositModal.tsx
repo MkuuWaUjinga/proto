@@ -28,7 +28,7 @@ const DepositModal: React.FC<DepositModalProps> = ({
   onClose,
 }) => {
   const assetNameToTokenAdress = {
-    ETH: null,
+    ETH: "",
     APEcoin: "0x4d224452801aced8b2f0aebe155379bb5d594381", // todo fix balance retrieval for tokens. currently throws ContractMethodNoResultError
   };
   const [amount, setAmount] = useState("");
