@@ -4,10 +4,13 @@ pragma solidity ^0.8.15;
 import "forge-std/Script.sol";
 import "../src/Strategy.sol";
 import "../src/Deposit.sol";
+import {console2} from "lib/forge-std/src/console2.sol";
+
 
 
 contract Deploy is Script {
     function run() external {
+
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
 
         address token = address(0);
@@ -20,7 +23,7 @@ contract Deploy is Script {
 
         DepositModule depositModule = new DepositModule();
         StrategyRegistry strategyRegistry = new StrategyRegistry(token, uniPositionManager, uniSwapRouter, depositModule);
-
+        console2.logAddress(address(strategyRegistry));
         vm.stopBroadcast();
     }
 }
