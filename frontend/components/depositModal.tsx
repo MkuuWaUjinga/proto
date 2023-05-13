@@ -14,10 +14,18 @@ import {
   useToast,
   Text,
 } from "@chakra-ui/react";
-import { useBalance, useAccount } from "wagmi"; // Import wagmi
+import { useBalance, useAccount, useContractWrite } from "wagmi"; // Import wagmi
+import {
+  assetNameToTokenAdress,
+  strategyAddress,
+  tokenAddressToAssetName,
+} from "../app/util/addresses";
+import StrategyRegistry from "../contracts/StrategyRegistry.json";
+import { prepareWriteContract, writeContract } from "@wagmi/core";
+import { Strategy } from "./strategiesTable";
 
 interface DepositModalProps {
-  strategy: any;
+  strategy: Strategy;
   isOpen: boolean;
   onClose: () => void;
 }
@@ -27,23 +35,18 @@ const DepositModal: React.FC<DepositModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  const assetNameToTokenAdress = {
-    ETH: "",
-    APEcoin: "0x4d224452801aced8b2f0aebe155379bb5d594381", // todo fix balance retrieval for tokens. currently throws ContractMethodNoResultError
-  };
   const [amount, setAmount] = useState("");
   const [isValid, setIsValid] = useState(true);
   const toast = useToast();
   const { address, isConnecting, isDisconnected } = useAccount();
+  const assetAddress =
+    strategy.selectedAsset == 1 ? strategy.asset1 : strategy.asset2;
+  const assetName = tokenAddressToAssetName[assetAddress];
   const balance = useBalance({
     address: address,
-    token: assetNameToTokenAdress[strategy.assetName],
+    token: assetAddress,
   });
   console.log("assetname", balance.data);
-  const withdrawFunds = async (assetName: string, amount: number) => {
-    // TODO - use wagmi to withdraw funds
-    return true;
-  };
 
   const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -59,10 +62,23 @@ const DepositModal: React.FC<DepositModalProps> = ({
 
   const handleDepositNow = async () => {
     try {
-      await withdrawFunds(strategy.assetName, parseFloat(amount));
+      const config = await prepareWriteContract({
+        address: strategyAddress,
+        abi: StrategyRegistry.abi,
+        functionName: "deposit",
+        args: [assetAddress, amount, strategy.id],
+      });
+      const tx = await writeContract(config);
+      toast({
+        title: "Depositing...",
+        status: "loading",
+        duration: 3000,
+        isClosable: true,
+      });
+      const res = await tx.wait();
       toast({
         title: "Deposit successful",
-        description: `${amount} ${strategy.assetName} deposited`,
+        description: `${amount} ${assetName} deposited`,
         status: "success",
         duration: 3000,
         isClosable: true,
@@ -83,7 +99,7 @@ const DepositModal: React.FC<DepositModalProps> = ({
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Deposit {strategy.assetName}</ModalHeader>
+        <ModalHeader>Deposit {assetName}</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           <Text mb={4}>Available: {balance.data?.formatted}</Text>
@@ -91,7 +107,7 @@ const DepositModal: React.FC<DepositModalProps> = ({
             <FormLabel>Amount</FormLabel>
             <Input
               type="number"
-              placeholder={`Enter amount of ${strategy.assetName}`}
+              placeholder={`Enter amount of ${assetName}`}
               value={amount}
               onChange={handleChange}
               isInvalid={!isValid}

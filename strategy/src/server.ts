@@ -11,7 +11,7 @@ const port = 3000;
 // Set up the provider
 let provider = ethers.getDefaultProvider("mainnet");
 // Do something every time a new block is mined
-provider.on("block", (blockNumber) => {
+provider.on("block", async (blockNumber) => {
   console.log("blocknumber", blockNumber - 2);
   const prices = await getPrices(blockNumber - 2);
 

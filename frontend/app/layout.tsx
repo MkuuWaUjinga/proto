@@ -27,16 +27,12 @@ const ethereumClient = new EthereumClient(wagmiClient, chains);
 // do not cache this layout
 export const revalidate = 0;
 
-export default async function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function RootLayout(params: any) {
   return (
     <html lang="en">
       <body>
         <ChakraProvider>
-          <WagmiConfig client={wagmiClient}>{children}</WagmiConfig>
+          <WagmiConfig client={wagmiClient}>{params?.children}</WagmiConfig>
           <Web3Modal projectId={projectId} ethereumClient={ethereumClient} />
         </ChakraProvider>
       </body>

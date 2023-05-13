@@ -17,12 +17,21 @@ import {
 import DepositModal from "./depositModal";
 import { AddIcon } from "@chakra-ui/icons";
 import NewStratModal from "./NewStratModal";
+import { tokenAddressToAssetName } from "../app/util/addresses";
 
-interface Strategy {
+export interface Strategy {
   id: number;
-  assetName: string;
-  apy: number;
-  submitter: string;
+  hash: string;
+  asset1: string;
+  asset2: string;
+  stake: string;
+  maxAllowedStrategyUse: number;
+  creator: string;
+  public_share_secret: string;
+  lastExecuted: number;
+  capitalAllocated1: number;
+  capitalAllocated2: number;
+  selectedAsset?: number;
 }
 
 interface StrategiesTableProps {
@@ -35,9 +44,9 @@ const StrategiesTable: React.FC<StrategiesTableProps> = ({ strategies }) => {
   const [selectedStrategy, setSelectedStrategy] = useState<Strategy | null>(
     null
   );
-
-  const handleDepositClick = (strategy: Strategy) => {
-    setSelectedStrategy(strategy);
+  console.log("strat", strategies);
+  const handleDepositClick = (strategy: Strategy, asset: 1 | 2) => {
+    setSelectedStrategy({ ...strategy, selectedAsset: asset });
     onOpen();
   };
 
@@ -48,6 +57,7 @@ const StrategiesTable: React.FC<StrategiesTableProps> = ({ strategies }) => {
           <Tr>
             <Th>Strategy ID</Th>
             <Th>Asset Name</Th>
+            <Th>Allocated Capital</Th>
             <Th>APY</Th>
             <Th>Submitter</Th>
             <Th>Action</Th>
@@ -55,20 +65,38 @@ const StrategiesTable: React.FC<StrategiesTableProps> = ({ strategies }) => {
         </Thead>
         <Tbody>
           {strategies.map((strategy) => (
-            <Tr key={strategy.id}>
-              <Td>{strategy.id}</Td>
-              <Td>{strategy.assetName}</Td>
-              <Td>{strategy.apy.toFixed(2)}%</Td>
-              <Td>{strategy.submitter}</Td>
-              <Td>
-                <Button
-                  colorScheme="blue"
-                  onClick={() => handleDepositClick(strategy)}
-                >
-                  Deposit
-                </Button>
-              </Td>
-            </Tr>
+            <>
+              <Tr key={strategy.id}>
+                <Td>{strategy.id}</Td>
+                <Td>{tokenAddressToAssetName[strategy.asset1]}</Td>
+                <Td>{strategy.capitalAllocated1}</Td>
+                <Td>Not enough historical data</Td>
+                <Td>{strategy.creator}</Td>
+                <Td>
+                  <Button
+                    colorScheme="blue"
+                    onClick={() => handleDepositClick(strategy, 1)}
+                  >
+                    Deposit
+                  </Button>
+                </Td>
+              </Tr>
+              <Tr key={strategy.id}>
+                <Td>{strategy.id}</Td>
+                <Td>{tokenAddressToAssetName[strategy.asset2]}</Td>
+                <Td>{strategy.capitalAllocated2}</Td>
+                <Td>Not enough historical data</Td>
+                <Td>{strategy.creator}</Td>
+                <Td>
+                  <Button
+                    colorScheme="blue"
+                    onClick={() => handleDepositClick(strategy, 2)}
+                  >
+                    Deposit
+                  </Button>
+                </Td>
+              </Tr>
+            </>
           ))}
         </Tbody>
       </Table>

@@ -164,7 +164,7 @@ contract StrategyRegistry {
     // USE FUNDS FROM VAULTS IN MARKET MAKING ACTIVITY
 
 
-    function registerStrategy(bytes32 hash, address asset1, uint256 stake, address public_share_secret) external {
+    function registerStrategy(bytes32 hash, address asset1,address asset2, uint256 stake, address public_share_secret) external {
         // require(startBlock <= endBlock, "Invalid block range.");
 
         // Transfer the stake from the user to this contract
