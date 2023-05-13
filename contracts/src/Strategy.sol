@@ -15,6 +15,7 @@ contract StrategyRegistry {
         address asset1;
         address asset2;
         uint256 stake;
+        uint256 maxAllowedStrategyUse;
         address creator;
         uint256 lastExecuted;
         uint256 capitalAllocated;
