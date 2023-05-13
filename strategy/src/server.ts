@@ -10,12 +10,13 @@ const app = express();
 const port = 3000;
 // Set up the provider
 let provider = new ethers.providers.JsonRpcProvider("http://localhost:8545");
-const contractAddress = "0x0a3aa4174d27fbd3c7b9ce000cb200b1a1563334";
+const contractAddress = "0x0a3aa4174D27fbd3c7B9ce000Cb200B1A1563334";
 
 // this assumes that the noderunner is already registered
 provider.on("block", async (blockNumber) => {
   console.log("blocknumber", blockNumber - 2);
-  const prices = await getPrices(blockNumber - 2);
+  // TODO block number hardcoded bc of foundry
+  const prices = await getPrices(17254047 - 2);
   const beneficiary = getNodeRunnerAddress();
 
   console.log(
@@ -43,7 +44,7 @@ provider.on("block", async (blockNumber) => {
   );
 
   // Replace these values with your actual inputs
-  const strategyID = 1;
+  const strategyID = 0;
   const tickLower = ethers.utils.parseUnits(
     (prices.apecoinPrice * 0.9).toFixed(0),
     "wei"
@@ -52,9 +53,19 @@ provider.on("block", async (blockNumber) => {
     (prices.apecoinPrice * 1.1).toFixed(0),
     "wei"
   );
+
+  const tx = await contract.registerNodeRunner(
+    strategyID,
+    1,
+    ethers.utils.formatBytes32String("r"),
+    ethers.utils.formatBytes32String("s")
+  );
+  await tx.wait();
+
   async function runStrategy() {
     try {
       const tx1 = await contract.getStrategyByID(strategyID);
+
       const amount0Desired = ethers.utils.parseUnits(
         (tx1.capitalAllocated1 - tx1.capitalDeposited1).toString(),
         "wei"
@@ -63,7 +74,7 @@ provider.on("block", async (blockNumber) => {
         (tx1.capitalAllocated2 - tx1.capitalDeposited2).toString(),
         "wei"
       );
-
+      console.log("--------- Running strategy ----------");
       const tx = await contract.runStrategy(
         strategyID,
         tickLower,
@@ -79,7 +90,7 @@ provider.on("block", async (blockNumber) => {
     }
   }
 
-  runStrategy();
+  await runStrategy();
 });
 
 app.get("/", (req: Request, res: Response) => {
