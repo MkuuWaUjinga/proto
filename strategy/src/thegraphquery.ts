@@ -4,7 +4,7 @@ const subgraphEndpoint = `https://gateway.thegraph.com/api/${process.env.GRAPH_A
 
 // Helper function to make GraphQL requests
 async function makeGraphRequest(query: string) {
-  console.log("nfe", JSON.stringify({query: query}));
+  console.log("nfe", JSON.stringify({ query: query }));
   const response = await fetch(subgraphEndpoint, {
     method: "POST",
     headers: {

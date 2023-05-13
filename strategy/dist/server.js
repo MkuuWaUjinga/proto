@@ -17,6 +17,7 @@ let provider = ethers_1.ethers.getDefaultProvider("mainnet");
 provider.on("block", (blockNumber) => {
     console.log("blocknumber", blockNumber);
     (0, thegraphquery_1.getPrices)(blockNumber);
+    //getPrices(blockNumber);
     // Insert your logic here
 });
 app.get("/", (req, res) => {
