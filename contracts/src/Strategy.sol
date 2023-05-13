@@ -90,7 +90,7 @@ contract StrategyRegistry {
         return strategies[strategyID];
     }
 
-    function runStrategy(uint256 strategyID, uint256 tickLower, uint256 tickUpper, uint256 amount0Desired, uint256 amount1Desired, uint256 amount0Min, uint256 amount1Min) external {
+    function runStrategy(uint256 nodeRunnerID, uint256 strategyID, uint256 tickLower, uint256 tickUpper, uint256 amount0Desired, uint256 amount1Desired, uint256 amount0Min, uint256 amount1Min) external {
         Strategy memory strategy = strategies[strategyID];
         require(msg.sender == strategy.creator, "Only the creator can run this strategy.");
 
