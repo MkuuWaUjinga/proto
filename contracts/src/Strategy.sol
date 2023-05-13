@@ -71,8 +71,7 @@ contract StrategyRegistry {
 
 
     // each asset has one strategy registry
-    constructor(address _stakingToken, address _positionManager, address _swapRouter) {
-        stakingToken = _stakingToken;
+    constructor(address _positionManager, address _swapRouter) {
         positionManager = _positionManager;
         swapRouter = _swapRouter;
     }

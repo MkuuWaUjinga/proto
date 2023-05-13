@@ -2,7 +2,7 @@
 #tr '\r' '\n' < .env > .env.unix
 source .env
 
-deployedStrategist=0xcE9AD6246481fE89432739d7BE369E83986421D3
+deployedStrategist=0x922455556D44d882c526CdF2ADF131abfD633e20
 
 
 # 
@@ -21,9 +21,15 @@ cast send --rpc-url http://localhost:8545 --private-key $PRIVATE_KEY_STRATEGIST 
 
 cast call --rpc-url http://localhost:8545 --private-key $PRIVATE_KEY_USER $addressUSDC "approve(address,uint256)" $deployedStrategist 1000000
 
-# #allownace+deposit and withdraw funds and check that funds are 0 eventually
+# #allownace+deposit and withdraw funds and check that funds are 0 eventually USDC
 cast send --rpc-url http://localhost:8545 --private-key $PRIVATE_KEY_USER $addressUSDC "approve(address,uint256)" $deployedStrategist 1000000
-cast send --rpc-url http://localhost:8545 --private-key $PRIVATE_KEY_USER $deployedStrategist "deposit(uint8,uint16,uint256)" 1 1000 0
+cast send --rpc-url http://localhost:8545 --private-key $PRIVATE_KEY_USER $deployedStrategist "deposit(uint8,uint16,uint256)" 1 10000 0
+
+# #allownace+deposit and withdraw funds and check that funds are 0 eventually BTC
+cast send --rpc-url http://localhost:8545 --private-key $PRIVATE_KEY_USER $addressBTC "approve(address,uint256)" $deployedStrategist 1000000
+cast send --rpc-url http://localhost:8545 --private-key $PRIVATE_KEY_USER $deployedStrategist "deposit(uint8,uint16,uint256)" 2 10000 0
+
+
 #cast send --rpc-url http://localhost:8545 --private-key $PRIVATE_KEY_USER $deployedStrategist "withdraw(uint8,uint16,uint256)" 1 1000 0
 
 # # check aToken balance for usdc
@@ -37,6 +43,6 @@ cast send --rpc-url http://localhost:8545 --private-key $PRIVATE_KEY_RUNNER $dep
 
 
 
-runStrategy(uint256 nodeRunnerID, uint256 strategyID, int24 tickLower, int24 tickUpper, uint256 amount0Desired, uint256 amount1Desired)
+# runStrategy(uint256 nodeRunnerID, uint256 strategyID, int24 tickLower, int24 tickUpper, uint256 amount0Desired, uint256 amount1Desired)
 #cast call 0x0B3b0376e52fBD02892878C7792D63b30D4Ac76B "getStrategies()"  --rpc-url http://localhost:8545
 
