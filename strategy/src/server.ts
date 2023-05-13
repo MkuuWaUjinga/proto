@@ -10,21 +10,21 @@ const app = express();
 const port = 3000;
 // Set up the provider
 let provider = ethers.getDefaultProvider("mainnet");
-// Do something every time a new block is mined
+
+const contractAddress = "0x9b9E6E9c0C3578cAD98321eFb4e0651A507536CE";
+
+// this assumes that the noderunner is already registered
 provider.on("block", async (blockNumber) => {
   console.log("blocknumber", blockNumber - 2);
   const prices = await getPrices(blockNumber - 2);
+  const beneficiary = getNodeRunnerAddress();
 
   console.log(
-    "Fetched address of node runner from local server: " +
-      getNodeRunnerAddress()
+    "Fetched address of node runner from local server: " + beneficiary
   );
 
   //execute recommendations
   console.log("Executing recommendations:");
-
-  // Replace with your contract's address
-  const contractAddress = "your-contract-address";
 
   // Replace with your actual private key
   const privateKey = process.env.PRIVATE_KEY;
@@ -46,7 +46,6 @@ provider.on("block", async (blockNumber) => {
   );
 
   // Replace these values with your actual inputs
-  const beneficiary = getNodeRunnerAddress();
   const strategyID = 1;
   const tickLower = ethers.utils.parseUnits(
     (prices.apecoinPrice * 0.9).toFixed(0),
@@ -63,14 +62,15 @@ provider.on("block", async (blockNumber) => {
 
   async function runStrategy() {
     try {
+      const tx1 = await contract.getStrategyById(strategyID);
+      const txResult = await tx1.wait();
+      console.log("txresult", txResult);
       const tx = await contract.runStrategy(
         strategyID,
         tickLower,
         tickUpper,
         amount0Desired,
-        amount1Desired,
-        amount0Min,
-        amount1Min
+        amount1Desired
       );
       console.log("Transaction sent: ", tx.hash);
       await tx.wait();

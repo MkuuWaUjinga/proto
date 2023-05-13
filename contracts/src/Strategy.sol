@@ -263,7 +263,6 @@ contract StrategyRegistry {
     }
 
 
-
     // function updateRange(uint256 tokenId, int24 newTickLower, int24 newTickUpper) external {
     //     // Collect the maximum amount of tokens from the position
     //     positionManager.collect({
