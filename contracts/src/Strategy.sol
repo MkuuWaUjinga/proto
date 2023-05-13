@@ -19,7 +19,6 @@ contract StrategyRegistry {
         uint256 strategyID;
         bytes32 hash;
         address asset1;
-        address asset2;
         uint256 stake;
         uint256 maxAllowedStrategyUse;
         address creator;
@@ -73,6 +72,14 @@ contract StrategyRegistry {
         swapRouter = _swapRouter;
     }
 
+    // function that returns an array of all strategy structs
+    function getStrategies() external view returns (Strategy[] memory) {
+        Strategy[] memory _strategies = new Strategy[](strategiesID.length);
+        for (uint256 i = 0; i < strategiesID.length; i++) {
+            _strategies[i] = strategies[strategiesID[i]];
+        }
+        return _strategies;
+    }
 
 
     // functions to manage the funds in vaults
@@ -81,11 +88,11 @@ contract StrategyRegistry {
         Strategy storage strategy = strategies[strategyID];
         require(IERC20(token).transferFrom(msg.sender, address(this), amount), "Transfer failed");
         
-        // Approve Aave Lending Pool to use the tokens
-        IERC20(token).approve(address(pool), amount);
-        pool.deposit(token, amount, address(this), amount);
-        strategy.capitalAllocated+=amount;
-        strategyBalances[strategyID][msg.sender] += amount;
+        // // Approve Aave Lending Pool to use the tokens
+        // IERC20(token).approve(address(pool), amount);
+        // pool.deposit(token, amount, address(this), amount);
+        // strategy.capitalAllocated+=amount;
+        // strategyBalances[strategyID][msg.sender] += amount;
     }
 
     // function deposit(uint256 strategyID, address token, uint256 amount) external {
@@ -157,7 +164,7 @@ contract StrategyRegistry {
     // USE FUNDS FROM VAULTS IN MARKET MAKING ACTIVITY
 
 
-    function registerStrategy(bytes32 hash, address asset1, address asset2, uint256 stake, address public_share_secret) external {
+    function registerStrategy(bytes32 hash, address asset1, uint256 stake, address public_share_secret) external {
         // require(startBlock <= endBlock, "Invalid block range.");
 
         // Transfer the stake from the user to this contract
@@ -172,7 +179,6 @@ contract StrategyRegistry {
             strategyID: strategiesID.length,
             hash: hash,
             asset1: asset1,
-            asset2: asset2,
             stake: stake,
             maxAllowedStrategyUse: 0,// TODO check
             creator: msg.sender,
@@ -204,10 +210,6 @@ contract StrategyRegistry {
 
 
 
-    function getStrategies() external view returns (uint256[] memory) {
-        return strategiesID;
-    }
-
     function getStrategyByID(uint256 strategyID) external view returns (Strategy memory) {
         return strategies[strategyID];
     }
@@ -221,7 +223,7 @@ contract StrategyRegistry {
         // Create a range order on Uniswap v3
         INonfungiblePositionManager.MintParams memory params = INonfungiblePositionManager.MintParams({
             token0: strategy.asset1,
-            token1: strategy.asset2,
+            token1: strategy.asset1,
             fee: 3000, // This will depend on your use case
             tickLower: tickLower, // This will depend on your use case
             tickUpper: tickUpper, // This will depend on your use case
