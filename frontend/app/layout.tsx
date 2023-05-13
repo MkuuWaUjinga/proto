@@ -32,8 +32,6 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const filepath = "/home/floydd34dsh0t/Downloads/1649673527405 (1).jpeg";
-  pinFileToIPFS(filepath);
   return (
     <html lang="en">
       <body>

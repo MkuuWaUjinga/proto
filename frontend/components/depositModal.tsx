@@ -29,29 +29,32 @@ const DepositModal: React.FC<DepositModalProps> = ({
 }) => {
   const assetNameToTokenAdress = {
     ETH: null,
-    APEcoin: "0x4d224452801ACEd8B2F0aebE155379bb5D594381", // todo fix balance retrieval for tokens. currently throws ContractMethodNoResultError
+    APEcoin: "0x4d224452801aced8b2f0aebe155379bb5d594381", // todo fix balance retrieval for tokens. currently throws ContractMethodNoResultError
   };
   const [amount, setAmount] = useState("");
   const [isValid, setIsValid] = useState(true);
   const toast = useToast();
   const { address, isConnecting, isDisconnected } = useAccount();
-  const balance = useBalance({ address: address, token: assetNameToTokenAdress[strategy.assetName] });
+  const balance = useBalance({
+    address: address,
+    token: assetNameToTokenAdress[strategy.assetName],
+  });
+  console.log("assetname", balance.data);
   const withdrawFunds = async (assetName: string, amount: number) => {
     // TODO - use wagmi to withdraw funds
     return true;
   };
 
-  
   const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setAmount(value);
     if (balance.data) {
-    if (parseFloat(value) <= parseFloat(balance.data.formatted)) {
-      setIsValid(true);
-    } else {
-      setIsValid(false);
+      if (parseFloat(value) <= parseFloat(balance.data.formatted)) {
+        setIsValid(true);
+      } else {
+        setIsValid(false);
+      }
     }
-   }
   };
 
   const handleDepositNow = async () => {
@@ -83,9 +86,7 @@ const DepositModal: React.FC<DepositModalProps> = ({
         <ModalHeader>Deposit {strategy.assetName}</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          <Text mb={4}>
-            Available:  {balance.data?.formatted} 
-            </Text>
+          <Text mb={4}>Available: {balance.data?.formatted}</Text>
           <FormControl id="amount" isRequired>
             <FormLabel>Amount</FormLabel>
             <Input
