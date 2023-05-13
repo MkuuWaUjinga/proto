@@ -12,7 +12,8 @@ let provider = ethers.getDefaultProvider("mainnet");
 // Do something every time a new block is mined
 provider.on("block", (blockNumber) => {
   console.log("blocknumber", blockNumber);
-  getPrices(blockNumber);
+  getPrices(17247597)
+  //getPrices(blockNumber);
   // Insert your logic here
 });
 

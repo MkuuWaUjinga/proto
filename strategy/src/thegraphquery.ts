@@ -4,7 +4,7 @@ const subgraphEndpoint = `https://gateway.thegraph.com/api/${process.env.GRAPH_A
 
 // Helper function to make GraphQL requests
 async function makeGraphRequest(query: string) {
-  console.log("nfe", query);
+  console.log("nfe", JSON.stringify({query: query}));
   const response = await fetch(subgraphEndpoint, {
     method: "POST",
     headers: {
@@ -12,15 +12,14 @@ async function makeGraphRequest(query: string) {
     },
     body: JSON.stringify({ query: query }),
   });
-  console.log("response", response);
-  const { data } = await response.json();
+  const data = await response.json();
   return data;
 }
 
 export async function getPrices(blockNumber: number) {
   console.log("e", process.env.GRAPH_API);
   // Retrieve the price of USDC and Apecoin
-  const tokenQuery = `{"query": "query {usdcToken: token(id: \\"0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48\\", block: {number: ${blockNumber}}) {id lastPriceUSD} apecoinToken: token(id: \\"0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2\\", block: { number: ${blockNumber}}) {id lastPriceUSD}}"}`;
+  const tokenQuery = `query {usdcToken: token(id: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48", block: {number: ${blockNumber}}) {id lastPriceUSD} apecoinToken: token(id: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2", block: { number: ${blockNumber}}) {id lastPriceUSD}}`;
 
   const tokenData = await makeGraphRequest(tokenQuery);
   console.log("tokendata", tokenData);
