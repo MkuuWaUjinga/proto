@@ -89,7 +89,7 @@ contract DepositModule {
     }
 
     // whitelist strategist function that can be only changed by the owner of this contract
-    function whitelistStrategist(address strategist) external {
+    function whitelistStrategist(address strategy) external {
         require(msg.sender == owner || msg.sender == strategyContract , "Only the owner can whitelist a strategist.");
         _whitelistedStrategists.push(strategist);
     }
@@ -97,9 +97,9 @@ contract DepositModule {
 
 
     // function that enables the a whitelised user to withdraw funds from the pool
-    function withdrawStrategist(address strategist, address token, uint256 amount) onlyWhitelistedStrategist external {
+    function withdrawStrategist(address strategy, address token, uint256 amount) onlyWhitelistedStrategist external {
         // Update the balance
-        strategistFundsUsed[strategist] += amount;
+        strategyFundsUsed[strategy] += amount;
         pool.withdraw(token, amount, address(strategyContract));
 
         // Withdraw the tokens from the Aave Lending Pool
