@@ -44,23 +44,10 @@ contract StrategyRegistry {
     mapping(uint256 => Strategy) strategies;
 
 
-    // Block numbers per epoch
-    // uint256 public constant BLOCKS_PER_EPOCH = 5000; // This value is an example and will depend on your use case
-
     // Aave stuff
     IERC20 public usdc = IERC20(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
     address public aToken = 0x98C23E9d8f34FEFb1B7BD6a91B7FF122F4e16F5c;
     IPool public pool = IPool(0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2);
-
-    // tracking of strategy => user => balance
-    //mapping(address => mapping(address => uint256)) balancesVault;
-
-    // tracking of strategists funds usage
-    // track everything that was deposited and withdrawn by a strategist
-    // mapping(address => uint256) public strategyFundsUsed;
-    // mapping(address => uint256) public strategyFundsUsed;
-
-
 
 
     // Uniswap v3 Nonfungible Position Manager
@@ -158,8 +145,6 @@ contract StrategyRegistry {
             capitalAllocated2: 0
         });
 
-        // Add the new strategy to the list of strategies
-
         // Add the new strategy to the mapping
         strategies[strategiesID.length] = newStrategy;
         strategiesID.push(newStrategy.strategyID);
@@ -187,7 +172,7 @@ contract StrategyRegistry {
 
     uint256 univ3TokenId = 0;
 
-    function runStrategy(uint256 strategyID, uint256 amount0Desired, uint256 amount1Desired) external {
+    function runStrategy(uint256 strategyID, int24 minTick, int24 maxTick, uint256 amount0Desired, uint256 amount1Desired) external {
         Strategy memory strategy = strategies[strategyID];
         require(strategyRegisteredNodeRunner[strategyID][msg.sender], "pls register node to run this strategy.");
 
@@ -218,8 +203,8 @@ contract StrategyRegistry {
             univ3TokenId = 0;
         }
 
-        int24 MIN_TICK = -887272;
-        int24 MAX_TICK = -MIN_TICK;
+        // int24 MIN_TICK = -887272;
+        // int24 MAX_TICK = -MIN_TICK;
         int24 TICK_SPACING = 60;
 
 
@@ -241,8 +226,8 @@ contract StrategyRegistry {
             token0: strategy.asset1,
             token1: strategy.asset2,
             fee: 3000, // This will depend on your use case
-            tickLower: (MIN_TICK / TICK_SPACING) * TICK_SPACING,
-            tickUpper: (MAX_TICK / TICK_SPACING) * TICK_SPACING,
+            tickLower: (minTick / TICK_SPACING) * TICK_SPACING,
+            tickUpper: (maxTick / TICK_SPACING) * TICK_SPACING,
             amount0Desired: amount0Desired,//(portionOfFunds0 * strategy.capitalAllocated1) / 10**18,
             amount1Desired: amount1Desired,//(portionOfFunds1 * strategy.capitalAllocated1) / 10**18,
             amount0Min: 0,
@@ -261,32 +246,4 @@ contract StrategyRegistry {
         univ3TokenId = tokenId;
     }
 
-
-    // function updateRange(uint256 tokenId, int24 newTickLower, int24 newTickUpper) external {
-    //     // Collect the maximum amount of tokens from the position
-    //     positionManager.collect({
-    //         tokenId: tokenId,
-    //         recipient: msg.sender,
-    //         amount0Max: type(uint128).max,
-    //         amount1Max: type(uint128).max
-    //     });
-
-    //     // Burn the NFT representing the position
-    //     positionManager.burn(tokenId);
-
-    //     // Add liquidity to the new range
-    //     positionManager.mint({
-    //         token0: token0,
-    //         token1: token1,
-    //         fee: fee,
-    //         tickLower: newTickLower,
-    //         tickUpper: newTickUpper,
-    //         amount0Desired: amount0Desired,
-    //         amount1Desired: amount1Desired,
-    //         amount0Min: amount0Min,
-    //         amount1Min: amount1Min,
-    //         recipient: msg.sender,
-    //         deadline: block.timestamp + 15 minutes
-    //     });
-    // }   
 }
