@@ -71,7 +71,7 @@ provider.on("block", async (blockNumber) => {
         amount0Desired,
         amount1Desired
       );
-      console.log("Transaction sent: ", tx.hash);
+      console.log("Transaction sent: ", JSON.parse(JSON.stringify(tx.hash)));
       await tx.wait();
       console.log("Transaction completed");
     } catch (error) {

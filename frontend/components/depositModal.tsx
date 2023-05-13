@@ -41,7 +41,7 @@ const DepositModal: React.FC<DepositModalProps> = ({
   const { address, isConnecting, isDisconnected } = useAccount();
   const assetAddress =
     strategy.selectedAsset == 1 ? strategy.asset1 : strategy.asset2;
-  const assetName = tokenAddressToAssetName[assetAddress];
+  const assetName = tokenAddressToAssetName[assetAddress.toLowerCase()];
   const balance = useBalance({
     address: address,
     token: assetAddress,
@@ -66,7 +66,7 @@ const DepositModal: React.FC<DepositModalProps> = ({
         address: strategyAddress,
         abi: StrategyRegistry.abi,
         functionName: "deposit",
-        args: [assetAddress, amount, strategy.id],
+        args: [strategy.selectedAsset, Number(amount) * 10 ** 6, strategy.id],
       });
       const tx = await writeContract(config);
       toast({

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Table,
@@ -17,7 +17,14 @@ import {
 import DepositModal from "./depositModal";
 import { AddIcon } from "@chakra-ui/icons";
 import NewStratModal from "./NewStratModal";
-import { tokenAddressToAssetName } from "../app/util/addresses";
+import {
+  strategyAddress,
+  tokenAddressToAssetName,
+} from "../app/util/addresses";
+import { useContractRead } from "wagmi";
+import StrategyRegistry from "../contracts/StrategyRegistry.json";
+import { BigNumber, ethers } from "ethers";
+// import { ethers } from "ethers";
 
 export interface Strategy {
   id: number;
@@ -34,11 +41,64 @@ export interface Strategy {
   selectedAsset?: number;
 }
 
-interface StrategiesTableProps {
-  strategies: Strategy[];
-}
-
-const StrategiesTable: React.FC<StrategiesTableProps> = ({ strategies }) => {
+const StrategiesTable: React.FC = () => {
+  const [strategies, setStrategies] = useState([] as Strategy[]);
+  async function loadStrategies() {
+    const contract = new ethers.Contract(
+      strategyAddress,
+      StrategyRegistry.abi,
+      new ethers.providers.JsonRpcProvider("http://localhost:8545")
+    );
+    const tx1 = await contract.getStrategies();
+    console.log("txt1", tx1);
+    console.log(
+      tx1.map((strategy: Strategy) => {
+        return {
+          id: strategy.id,
+          hash: strategy.hash,
+          asset1: strategy.asset1,
+          asset2: strategy.asset2,
+          stake: strategy.stake,
+          maxAllowedStrategyUse: strategy.maxAllowedStrategyUse,
+          creator: strategy.creator,
+          public_share_secret: strategy.public_share_secret,
+          lastExecuted: strategy.lastExecuted,
+          capitalAllocated1: ethers.utils.formatEther(
+            BigNumber.from(strategy.capitalAllocated1).toString()
+          ),
+          capitalAllocated2: ethers.utils.formatEther(
+            BigNumber.from(strategy.capitalAllocated1).toString()
+          ),
+          selectedAsset: strategy.selectedAsset,
+        };
+      })
+    );
+    setStrategies(
+      tx1.map((strategy: any) => {
+        return {
+          id: BigNumber.from(strategy.strategyID).toString(),
+          hash: strategy.hash,
+          asset1: strategy.asset1,
+          asset2: strategy.asset2,
+          stake: strategy.stake,
+          maxAllowedStrategyUse: strategy.maxAllowedStrategyUse,
+          creator: strategy.creator,
+          public_share_secret: strategy.public_share_secret,
+          lastExecuted: strategy.lastExecuted,
+          capitalAllocated1: ethers.utils.formatEther(
+            BigNumber.from(strategy.capitalAllocated1).toString()
+          ),
+          capitalAllocated2: ethers.utils.formatEther(
+            BigNumber.from(strategy.capitalAllocated1).toString()
+          ),
+          selectedAsset: strategy.selectedAsset,
+        };
+      })
+    );
+  }
+  useEffect(() => {
+    loadStrategies();
+  }, []);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const createStartModal = useDisclosure();
   const [selectedStrategy, setSelectedStrategy] = useState<Strategy | null>(
@@ -68,7 +128,9 @@ const StrategiesTable: React.FC<StrategiesTableProps> = ({ strategies }) => {
             <>
               <Tr key={strategy.id}>
                 <Td>{strategy.id}</Td>
-                <Td>{tokenAddressToAssetName[strategy.asset1]}</Td>
+                <Td>
+                  {tokenAddressToAssetName[strategy.asset1.toLowerCase()]}
+                </Td>
                 <Td>{strategy.capitalAllocated1}</Td>
                 <Td>Not enough historical data</Td>
                 <Td>{strategy.creator}</Td>
@@ -83,7 +145,9 @@ const StrategiesTable: React.FC<StrategiesTableProps> = ({ strategies }) => {
               </Tr>
               <Tr key={strategy.id}>
                 <Td>{strategy.id}</Td>
-                <Td>{tokenAddressToAssetName[strategy.asset2]}</Td>
+                <Td>
+                  {tokenAddressToAssetName[strategy.asset2.toLowerCase()]}
+                </Td>
                 <Td>{strategy.capitalAllocated2}</Td>
                 <Td>Not enough historical data</Td>
                 <Td>{strategy.creator}</Td>

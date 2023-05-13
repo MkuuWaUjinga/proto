@@ -52,15 +52,12 @@ const UploadModal: React.FC<NewStratModalProps> = ({ isOpen, onClose }) => {
     formState: { errors },
   } = useForm<FormInputs>();
   const [loading, setLoading] = useState(false);
-  const { chains, error, isLoading, pendingChainId, switchNetwork } =
-    useSwitchNetwork();
 
   const onSubmit = async (data: FormInputs) => {
     if (!data.file.length) {
       return alert("Please select a file to upload");
     }
     console.log("switc hn");
-    switchNetwork!(1337);
     console.log("switc hn done");
 
     try {
@@ -82,6 +79,7 @@ const UploadModal: React.FC<NewStratModalProps> = ({ isOpen, onClose }) => {
       });
       setLoading(true);
       console.log("datwmk", data.token1 as `0x${string}`);
+      console.log("i", "d" + strategyAddress + "d");
       let config = await prepareWriteContract({
         address: data.token1 as `0x${string}`,
         abi: erc20ABI,
@@ -95,23 +93,31 @@ const UploadModal: React.FC<NewStratModalProps> = ({ isOpen, onClose }) => {
         duration: 3000,
         isClosable: true,
       });
-      await tx.wait();
+      console.log("bwej");
+      console.log("moin", await tx.wait());
       toast({
         title: "Fetched strategist secret and registering strategy...",
         status: "loading",
         duration: 3000,
         isClosable: true,
       });
+      console.log("input", [
+        ipfsData.IpfsHash,
+        data.token1,
+        data.token2,
+        ethers.utils.parseEther(data.stake).toString(),
+        "secret",
+      ]);
       let config2 = await prepareWriteContract({
-        address: strategyAddress as `0x${string}`,
+        address: strategyAddress as any,
         abi: StrategyRegistry.abi,
         functionName: "registerStrategy",
         args: [
-          ipfsData,
+          ethers.utils.formatBytes32String(ipfsData.IpfsHash.slice(0, 31)),
           data.token1,
           data.token2,
-          ethers.utils.parseEther(data.stake),
-          "secret",
+          BigNumber.from(data.stake).toHexString(),
+          "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
         ],
       });
       tx = await writeContract(config2);
@@ -122,12 +128,12 @@ const UploadModal: React.FC<NewStratModalProps> = ({ isOpen, onClose }) => {
         duration: 3000,
         isClosable: true,
       });
-
       //upload python
     } catch (err: any) {
       alert(err.message);
     } finally {
       setLoading(false);
+      onClose();
     }
   };
   const tokenOptions = [
