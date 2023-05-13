@@ -19,16 +19,19 @@ contract StrategyRegistry {
         uint256 strategyID;
         bytes32 hash;
         address asset1;
+        address asset2;
         uint256 stake;
         uint256 maxAllowedStrategyUse;
         address creator;
         address public_share_secret;
         uint256 lastExecuted;
-        uint256 capitalAllocated;
+        uint256 capitalAllocated1;
+        uint256 capitalAllocated2;
+
     }
 
-    // Mapping from strategy ID
-    mapping(uint256 => mapping(address => uint256)) strategyBalances;
+    // Mapping from strategy => user => token => balance
+    mapping(uint256 => mapping(address => mapping(address => uint256))) strategyBalances;
     mapping(uint256 => mapping(address => bool)) strategyRegisteredNodeRunner;
 
 
@@ -84,15 +87,24 @@ contract StrategyRegistry {
 
     // functions to manage the funds in vaults
 
-    function deposit(address token, uint16 amount, uint256 strategyID) external {
+    function deposit(uint8 asset, uint16 amount, uint256 strategyID) external {
         Strategy storage strategy = strategies[strategyID];
-        require(IERC20(token).transferFrom(msg.sender, address(this), amount), "Transfer failed");
+        address token;
+        if (asset==1){
+            token = strategy.asset1;
+            strategy.capitalAllocated1+=amount;
+        }
+        else{
+            token = strategy.asset2;
+            strategy.capitalAllocated2+=amount;
+        }
+        IERC20(token).transferFrom(msg.sender, address(this), amount);
         
         // // Approve Aave Lending Pool to use the tokens
-        // IERC20(token).approve(address(pool), amount);
-        // pool.deposit(token, amount, address(this), amount);
-        // strategy.capitalAllocated+=amount;
-        // strategyBalances[strategyID][msg.sender] += amount;
+        IERC20(token).approve(address(pool), amount);
+        pool.deposit(token, amount, address(this), amount);
+        strategiesID.push(strategyID);
+        strategyBalances[strategyID][msg.sender][token] += amount;
     }
 
     // function deposit(uint256 strategyID, address token, uint256 amount) external {
@@ -113,11 +125,22 @@ contract StrategyRegistry {
     //     balancesVault[token][msg.sender] += amount;
     // }
 
-    function withdraw(address token, uint256 amount, uint256 strategyID) external{
+    function withdraw(uint8 asset, uint256 amount, uint256 strategyID) external{
         Strategy storage strategy = strategies[strategyID];
-        require(strategyBalances[strategyID][msg.sender] >= amount, "Insufficient balance");
-        strategyBalances[strategyID][msg.sender] -= amount;
-        strategy.capitalAllocated-=amount;
+        address token;
+        if (asset==1){
+            token = strategy.asset1;
+            strategy.capitalAllocated1+=amount;
+        }
+        else{
+            token = strategy.asset2;
+            strategy.capitalAllocated2+=amount;
+        }
+    // Mapping from strategy => user => token => balance
+
+        require(strategyBalances[strategyID][msg.sender][token] >= amount, "Insufficient balance");
+        strategyBalances[strategyID][msg.sender][token] -= amount;
+        strategy.capitalAllocated1-=amount;
         pool.withdraw(token, amount, msg.sender);
     }
 
@@ -164,11 +187,11 @@ contract StrategyRegistry {
     // USE FUNDS FROM VAULTS IN MARKET MAKING ACTIVITY
 
 
-    function registerStrategy(bytes32 hash, address asset1, uint256 stake, address public_share_secret) external {
+    function registerStrategy(bytes32 hash, address asset1, address asset2, uint256 stake, address public_share_secret) external {
         // require(startBlock <= endBlock, "Invalid block range.");
 
         // Transfer the stake from the user to this contract
-        IERC20(asset1).transferFrom(msg.sender, address(this), stake);
+        require(IERC20(asset1).transferFrom(msg.sender, address(this), stake));
 
         // Calculate the start and end epochs
         // uint256 startEpoch = startBlock / BLOCKS_PER_EPOCH;
@@ -179,19 +202,22 @@ contract StrategyRegistry {
             strategyID: strategiesID.length,
             hash: hash,
             asset1: asset1,
+            asset2: asset2,
             stake: stake,
             maxAllowedStrategyUse: 0,// TODO check
             creator: msg.sender,
             public_share_secret: public_share_secret,
             lastExecuted: 0,
-            capitalAllocated: 0
+            capitalAllocated1: 0,
+            capitalAllocated2: 0
         });
 
         // Add the new strategy to the list of strategies
-        strategiesID.push(newStrategy.strategyID);
 
         // Add the new strategy to the mapping
-        strategies[newStrategy.strategyID] = newStrategy;
+        strategies[strategiesID.length] = newStrategy;
+        strategiesID.push(newStrategy.strategyID);
+
     }
 
     function registerNodeRunner(uint256 strategyID, uint8 v, bytes32 r, bytes32 s) external{
@@ -227,8 +253,8 @@ contract StrategyRegistry {
             fee: 3000, // This will depend on your use case
             tickLower: tickLower, // This will depend on your use case
             tickUpper: tickUpper, // This will depend on your use case
-            amount0Desired: (portionOfFunds0 * strategy.capitalAllocated) / 10**18,
-            amount1Desired: (portionOfFunds1 * strategy.capitalAllocated) / 10**18,
+            amount0Desired: (portionOfFunds0 * strategy.capitalAllocated1) / 10**18,
+            amount1Desired: (portionOfFunds1 * strategy.capitalAllocated1) / 10**18,
             amount0Min: 0,
             amount1Min: 0,
             recipient: address(this),

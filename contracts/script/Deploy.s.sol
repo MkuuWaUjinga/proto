@@ -11,7 +11,7 @@ import {console2} from "lib/forge-std/src/console2.sol";
 contract Deploy is Script {
     function run() external {
 
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY_USER");
 
         address token = address(0);
 
