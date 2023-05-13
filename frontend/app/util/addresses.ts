@@ -1,4 +1,4 @@
-export const strategyAddress = "0x9b9E6E9c0C3578cAD98321eFb4e0651A507536CE";
+export const strategyAddress = "0x0a3aa4174d27fbd3c7b9ce000cb200b1a1563334";
 
 export const assetNameToTokenAdress: { [x: string]: string } = {
   ETH: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",

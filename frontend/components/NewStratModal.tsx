@@ -28,7 +28,7 @@ import { ChevronDownIcon } from "@chakra-ui/icons";
 import { prepareWriteContract, writeContract } from "@wagmi/core";
 import { strategyAddress } from "../app/util/addresses";
 import StrategyRegistry from "../contracts/StrategyRegistry.json";
-import { erc20ABI } from "wagmi";
+import { erc20ABI, useSwitchNetwork } from "wagmi";
 import { BigNumber } from "ethers";
 
 interface FormInputs {
@@ -52,11 +52,16 @@ const UploadModal: React.FC<NewStratModalProps> = ({ isOpen, onClose }) => {
     formState: { errors },
   } = useForm<FormInputs>();
   const [loading, setLoading] = useState(false);
+  const { chains, error, isLoading, pendingChainId, switchNetwork } =
+    useSwitchNetwork();
 
   const onSubmit = async (data: FormInputs) => {
     if (!data.file.length) {
       return alert("Please select a file to upload");
     }
+    console.log("switc hn");
+    switchNetwork!(1337);
+    console.log("switc hn done");
 
     try {
       toast({
@@ -98,7 +103,7 @@ const UploadModal: React.FC<NewStratModalProps> = ({ isOpen, onClose }) => {
         isClosable: true,
       });
       let config2 = await prepareWriteContract({
-        address: strategyAddress,
+        address: strategyAddress as `0x${string}`,
         abi: StrategyRegistry.abi,
         functionName: "registerStrategy",
         args: [

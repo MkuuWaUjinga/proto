@@ -9,9 +9,8 @@ dotenv.config();
 const app = express();
 const port = 3000;
 // Set up the provider
-let provider = ethers.getDefaultProvider("mainnet");
-
-const contractAddress = "0x9b9E6E9c0C3578cAD98321eFb4e0651A507536CE";
+let provider = new ethers.providers.JsonRpcProvider("http://localhost:8545");
+const contractAddress = "0x0a3aa4174d27fbd3c7b9ce000cb200b1a1563334";
 
 // this assumes that the noderunner is already registered
 provider.on("block", async (blockNumber) => {
@@ -30,10 +29,8 @@ provider.on("block", async (blockNumber) => {
   const privateKey = process.env.PRIVATE_KEY;
 
   // Replace with the URL of your Ethereum node
-  const providerUrl = "https://mainnet.infura.io/v3/YOUR_INFURA_PROJECT_ID";
 
   // Create a new provider
-  const provider = new ethers.providers.JsonRpcProvider(providerUrl);
 
   // Create a new wallet instance
   const wallet = new ethers.Wallet(privateKey, provider);
@@ -52,19 +49,21 @@ provider.on("block", async (blockNumber) => {
     "wei"
   );
   const tickUpper = ethers.utils.parseUnits(
-    (prices.apecoinPrice * 0.9).toFixed(0),
+    (prices.apecoinPrice * 1.1).toFixed(0),
     "wei"
   );
-  const amount0Desired = ethers.utils.parseUnits("1", "wei");
-  const amount1Desired = ethers.utils.parseUnits("1", "wei");
-  const amount0Min = ethers.utils.parseUnits("1", "wei");
-  const amount1Min = ethers.utils.parseUnits("1", "wei");
-
   async function runStrategy() {
     try {
-      const tx1 = await contract.getStrategyById(strategyID);
-      const txResult = await tx1.wait();
-      console.log("txresult", txResult);
+      const tx1 = await contract.getStrategyByID(strategyID);
+      const amount0Desired = ethers.utils.parseUnits(
+        (tx1.capitalAllocated1 - tx1.capitalDeposited1).toString(),
+        "wei"
+      );
+      const amount1Desired = ethers.utils.parseUnits(
+        (tx1.capitalAllocated2 - tx1.capitalDeposited2).toString(),
+        "wei"
+      );
+
       const tx = await contract.runStrategy(
         strategyID,
         tickLower,

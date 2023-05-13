@@ -10,13 +10,21 @@ import {
 } from "@web3modal/ethereum";
 import { Web3Modal } from "@web3modal/react";
 import { configureChains, createClient, WagmiConfig } from "wagmi";
-import { arbitrum, mainnet, polygon, goerli } from "wagmi/chains";
+import { arbitrum, mainnet, polygon, goerli, localhost } from "wagmi/chains";
 import { pinFileToIPFS } from "./util/ipfs";
+import { jsonRpcProvider } from "wagmi/providers/jsonRpc";
+import { useEffect } from "react";
 
-const chains = [arbitrum, mainnet, polygon, goerli];
+const chains = [localhost];
 const projectId = "0428dfd8676dea37c88c6638615d3790";
 
-const { provider } = configureChains(chains, [w3mProvider({ projectId })]);
+const { provider } = configureChains(chains, [
+  jsonRpcProvider({
+    rpc: (chain) => ({
+      http: `http://localhost:8545`,
+    }),
+  }),
+]);
 const wagmiClient = createClient({
   autoConnect: true,
   connectors: w3mConnectors({ projectId, version: 1, chains }),
