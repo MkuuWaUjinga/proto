@@ -2,8 +2,8 @@
 pragma solidity ^0.8.15;
 
 import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
-import "v3-periphery/contracts/interfaces/INonfungiblePositionManager.sol";
-import "v3-periphery/contracts/interfaces/ISwapRouter.sol";
+import "v3-periphery/interfaces/INonfungiblePositionManager.sol";
+import "v3-periphery/interfaces/ISwapRouter.sol";
 import "./Deposit.sol";
 
 contract StrategyRegistry {
