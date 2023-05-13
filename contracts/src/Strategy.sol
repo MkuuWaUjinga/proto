@@ -17,6 +17,7 @@ contract StrategyRegistry {
         uint256 startEpoch;
         uint256 endEpoch;
         uint256 stake;
+        uint256 maxAllowedStrategyUse;
         address creator;
         uint256 lastExecuted;
     }

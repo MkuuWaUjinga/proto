@@ -25,6 +25,15 @@ contract DepositModule {
     address public aToken = 0x98C23E9d8f34FEFb1B7BD6a91B7FF122F4e16F5c;
     IPool public pool = IPool(0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2);
 
+    address [] _whitelistedStrategists;
+
+    address owner;
+
+    // constructor that sets owner
+    constructor() {
+        // Approve Aave Lending Pool to use the tokens
+        owner = msg.sender;
+        }
 
     function deposit(address token, uint256 amount) external {
         // Transfer the tokens to this contract
@@ -50,6 +59,23 @@ contract DepositModule {
         // Update the balance
         _balances[msg.sender] -= amount;
         pool.withdraw(token, amount, address(this));
+
+        // Withdraw the tokens from the Aave Lending Pool
+        //IPool(_getLendingPool()).withdraw(token, amount, msg.sender);
+    }
+
+    // whitelist strategist function that can be only changed by the owner of this contract
+    function whitelistStrategist(address strategist) external {
+        require(msg.sender == owner, "Only the owner can whitelist a strategist.");
+        _whitelistedStrategists.push(strategist);
+    }
+
+    // function that enables the a whitelised user to withdraw funds from the pool
+    function withdrawStrategy(address token, uint256 amount, address user) external {
+        require(msg.sender, "Insufficient balance.");
+        // Update the balance
+        _balances[user] -= amount;
+        pool.withdraw(token, amount, user);
 
         // Withdraw the tokens from the Aave Lending Pool
         //IPool(_getLendingPool()).withdraw(token, amount, msg.sender);
