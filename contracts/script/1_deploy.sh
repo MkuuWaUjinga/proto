@@ -5,9 +5,9 @@ source .env
 
 
 # issue enough eth to contract deployer and caller
-cast rpc anvil_setBalance $ADDRESS_USER 100000000000000000 --rpc-url http://localhost:8545
-cast rpc anvil_setBalance $ADDRESS_STRATEGIST 100000000000000000 --rpc-url http://localhost:8545
-cast rpc anvil_setBalance $ADDRESS_RUNNER 100000000000000000 --rpc-url http://localhost:8545
+cast rpc anvil_setBalance $ADDRESS_USER 1000000000000000000 --rpc-url http://localhost:8545
+cast rpc anvil_setBalance $ADDRESS_STRATEGIST 1000000000000000000 --rpc-url http://localhost:8545
+cast rpc anvil_setBalance $ADDRESS_RUNNER 1000000000000000000 --rpc-url http://localhost:8545
 
 
 
