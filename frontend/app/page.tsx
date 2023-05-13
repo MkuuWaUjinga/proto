@@ -1,31 +1,29 @@
-"use client"
-import { VStack } from "@chakra-ui/react";
-import Navbar from "../components/navbar"
-import StrategiesTable from "../components/strategiesTable"
-
-const strategies = [
-  {
-    id: 1,
-    assetName: "APEcoin",
-    apy: 5.5,
-    submitter: "Alice",
-  },
-  {
-    id: 2,
-    assetName: "ETH",
-    apy: 4.2,
-    submitter: "Bob",
-  },
-  // Add more strategies if needed
-];
+"use client";
+import { Spinner, VStack } from "@chakra-ui/react";
+import Navbar from "../components/navbar";
+import { useState } from "react";
+import StrategiesTable from "../components/strategiesTable";
+import { useContractRead } from "wagmi";
+import { strategyAddress } from "./util/addresses";
+import StrategyRegistry from "../contracts/StrategyRegistry.json";
 
 export default function MainPage() {
-  return (
-    <>
-   <VStack spacing={4} align="stretch">
-        <Navbar />
-        <StrategiesTable strategies={strategies} />
-      </VStack>
-    </>
-  )
+  const [strategies, setStrategies] = useState();
+  const { data, isError, isLoading } = useContractRead({
+    address: strategyAddress,
+    abi: StrategyRegistry.abi,
+    functionName: "getStrategies",
+  });
+  if (!isLoading) {
+    return (
+      <>
+        <VStack spacing={4} align="stretch">
+          <Navbar />
+          <StrategiesTable strategies={data} />
+        </VStack>
+      </>
+    );
+  } else {
+    <Spinner />;
+  }
 }

@@ -14,6 +14,7 @@ import { ChevronDownIcon, MoonIcon, SunIcon } from "@chakra-ui/icons";
 //import { getCryptoPrice } from "../utils/getPrices";
 
 import { Web3Button } from "@web3modal/react";
+import Image from "next/image";
 
 interface NavbarProps {}
 
@@ -31,9 +32,12 @@ const Navbar: React.FC<NavbarProps> = () => {
       boxShadow="md"
     >
       <Flex align="center" mr={5}>
-        <Text fontSize="xl" fontWeight="bold">
-          X2
-        </Text>
+        <Image
+          src="/logo-no-background.png"
+          width={"100"}
+          height="100"
+          alt="Image"
+        />
       </Flex>
 
       <Flex
