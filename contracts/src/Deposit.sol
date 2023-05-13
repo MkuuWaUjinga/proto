@@ -42,6 +42,6 @@ contract DepositModule {
     }
 
     function _getLendingPool() private view returns (address) {
-        return IPoolAddressesProvider(LENDING_POOL_ADDRESSES_PROVIDER).getLendingPool();
+        return IPoolAddressesProvider(LENDING_POOL_ADDRESSES_PROVIDER).getPool();
     }
 }

@@ -21,7 +21,7 @@ contract StrategyRegistry {
     }
 
     // Array of all strategies
-    uint256[]  strategiesID;
+    uint256[] strategiesID;
 
     // Mapping from strategy ID to strategy
     mapping(uint256 => Strategy) strategies;
@@ -33,14 +33,18 @@ contract StrategyRegistry {
     uint256 public constant BLOCKS_PER_EPOCH = 5000; // This value is an example and will depend on your use case
 
     // Uniswap v3 Nonfungible Position Manager
-    INonfungiblePositionManager public positionManager;
+    address public positionManager;
 
     // Uniswap v3 Swap Router
-    ISwapRouter public swapRouter;
+    address public swapRouter;
+
+    DepositModule public depositModule;
+
+    address public stakingToken;
 
 
     // each asset has one strategy registry
-    constructor(IERC20 _stakingToken, INonfungiblePositionManager _positionManager, ISwapRouter _swapRouter, DepositModule _depositModule) {
+    constructor(address _stakingToken, address _positionManager, address _swapRouter, DepositModule _depositModule) {
         stakingToken = _stakingToken;
         positionManager = _positionManager;
         swapRouter = _swapRouter;
@@ -59,13 +63,14 @@ contract StrategyRegistry {
 
         // Create the new strategy
         Strategy memory newStrategy = Strategy({
-            strategyID: _strategies.length,
+            strategyID: strategiesID.length,
             hash: hash,
             asset: asset,
             startEpoch: startEpoch,
             endEpoch: endEpoch,
             stake: stake,
-            creator: msg.sender
+            creator: msg.sender,
+            lastExecuted: 0
         });
 
         // Add the new strategy to the list of strategies
@@ -75,12 +80,12 @@ contract StrategyRegistry {
         strategies[newStrategy.strategyID] = newStrategy;
     }
 
-    function getStrategies() external view returns (Strategy[] memory) {
-        return _strategies;
+    function getStrategies() external view returns (uint256[] memory) {
+        return strategiesID;
     }
 
     function getStrategyByID(uint256 strategyID) external view returns (Strategy memory) {
-        return _strategyByID[strategyID];
+        return strategies[strategyID];
     }
 
     function runStrategy(uint256 strategyID) external {
@@ -105,39 +110,39 @@ contract StrategyRegistry {
         });
 
         // Transfer the required tokens to the Position Manager
-        stakingToken.approve(address(positionManager), strategy.stake);
+        IERC20(stakingToken).approve(address(positionManager), strategy.stake);
 
         // Mint the position
-        positionManager.mint(params);
+        INonfungiblePositionManager(positionManager).mint(params);
     }
 
-    function updateRange(uint256 tokenId, int24 newTickLower, int24 newTickUpper) external {
-        // Collect the maximum amount of tokens from the position
-        positionManager.collect({
-            tokenId: tokenId,
-            recipient: msg.sender,
-            amount0Max: type(uint128).max,
-            amount1Max: type(uint128).max
-        });
+    // function updateRange(uint256 tokenId, int24 newTickLower, int24 newTickUpper) external {
+    //     // Collect the maximum amount of tokens from the position
+    //     positionManager.collect({
+    //         tokenId: tokenId,
+    //         recipient: msg.sender,
+    //         amount0Max: type(uint128).max,
+    //         amount1Max: type(uint128).max
+    //     });
 
-        // Burn the NFT representing the position
-        positionManager.burn(tokenId);
+    //     // Burn the NFT representing the position
+    //     positionManager.burn(tokenId);
 
-        // Add liquidity to the new range
-        positionManager.mint({
-            token0: token0,
-            token1: token1,
-            fee: fee,
-            tickLower: newTickLower,
-            tickUpper: newTickUpper,
-            amount0Desired: amount0Desired,
-            amount1Desired: amount1Desired,
-            amount0Min: amount0Min,
-            amount1Min: amount1Min,
-            recipient: msg.sender,
-            deadline: block.timestamp + 15 minutes
-        });
-    }   
+    //     // Add liquidity to the new range
+    //     positionManager.mint({
+    //         token0: token0,
+    //         token1: token1,
+    //         fee: fee,
+    //         tickLower: newTickLower,
+    //         tickUpper: newTickUpper,
+    //         amount0Desired: amount0Desired,
+    //         amount1Desired: amount1Desired,
+    //         amount0Min: amount0Min,
+    //         amount1Min: amount1Min,
+    //         recipient: msg.sender,
+    //         deadline: block.timestamp + 15 minutes
+    //     });
+    // }   
 
 
 }
