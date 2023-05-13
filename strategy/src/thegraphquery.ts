@@ -28,6 +28,7 @@ export async function getPrices(blockNumber: number) {
   const tokenQuery = `query {usdcToken: token(id: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48", block: {number: ${blockNumber}}) {id lastPriceUSD} apecoinToken: token(id: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2", block: { number: ${blockNumber}}) {id lastPriceUSD}}`;
 
   const tokenData = await makeGraphRequest(tokenQuery);
+  // console.log(tokenData);
   const usdcPrice = tokenData.data.usdcToken?.lastPriceUSD;
   const apecoinPrice = tokenData.data.apecoinToken?.lastPriceUSD;
 

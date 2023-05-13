@@ -3,7 +3,6 @@ pragma solidity ^0.8.15;
 
 import "forge-std/Script.sol";
 import "../src/Strategy.sol";
-import "../src/Deposit.sol";
 import {console2} from "lib/forge-std/src/console2.sol";
 
 

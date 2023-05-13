@@ -15,7 +15,8 @@ const contractAddress = "0x0a3aa4174D27fbd3c7B9ce000Cb200B1A1563334";
 // this assumes that the noderunner is already registered
 provider.on("block", async (blockNumber) => {
   console.log("blocknumber", blockNumber - 2);
-  const prices = await getPrices(blockNumber - 2);
+  // TODO block number hardcoded bc of foundry
+  const prices = await getPrices(17254047 - 2);
   const beneficiary = getNodeRunnerAddress();
 
   console.log(
