@@ -21,11 +21,10 @@ contract Deploy is Script {
 
         vm.startBroadcast(deployerPrivateKey);
 
-        DepositModule depositModule = new DepositModule();
-        StrategyRegistry strategyRegistry = new StrategyRegistry(token, uniPositionManager, uniSwapRouter, depositModule);
+        //DepositModule depositModule = new DepositModule();
+        StrategyRegistry strategyRegistry = new StrategyRegistry(token, uniPositionManager, uniSwapRouter);
 
-        depositModule.registerStrategyContract(address(strategyRegistry));
-        
+
         console2.logAddress(address(strategyRegistry));
         vm.stopBroadcast();
     }

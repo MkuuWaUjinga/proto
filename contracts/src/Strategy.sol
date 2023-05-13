@@ -1,10 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.15;
 
+import "aave-v3-core/contracts/interfaces/IPool.sol";
+import "aave-v3-core/contracts/interfaces/IPoolAddressesProvider.sol";
+
+
 import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import "v3-periphery/interfaces/INonfungiblePositionManager.sol";
 import "v3-periphery/interfaces/ISwapRouter.sol";
-import "./Deposit.sol";
+// import "./Deposit.sol";
+import {console2} from "lib/forge-std/src/console2.sol";
+
 
 contract StrategyRegistry {
     
@@ -17,11 +23,15 @@ contract StrategyRegistry {
         uint256 stake;
         uint256 maxAllowedStrategyUse;
         address creator;
+        address public_share_secret;
         uint256 lastExecuted;
         uint256 capitalAllocated;
-        mapping(address => uint256) balances;
-        mapping(address => bool) registeredNodeRunner;
     }
+
+    // Mapping from strategy ID
+    mapping(uint256 => mapping(address => uint256)) strategyBalances;
+    mapping(uint256 => mapping(address => bool)) strategyRegisteredNodeRunner;
+
 
     // Array of all strategies
     uint256[] strategiesID;
@@ -57,29 +67,25 @@ contract StrategyRegistry {
 
 
     // each asset has one strategy registry
-    constructor(address _stakingToken, address _positionManager, address _swapRouter, DepositModule _depositModule) {
+    constructor(address _stakingToken, address _positionManager, address _swapRouter) {
         stakingToken = _stakingToken;
         positionManager = _positionManager;
         swapRouter = _swapRouter;
-        depositModule = _depositModule;
     }
 
 
 
     // functions to manage the funds in vaults
 
-    function deposit(address token, uint256 amount, uint256 strategyID) external {
+    function deposit(address token, uint16 amount, uint256 strategyID) external {
         Strategy storage strategy = strategies[strategyID];
-        IERC20 token = IERC20(_tokenAddress);
-        require(token.transferFrom(msg.sender, address(this), amount), "Transfer failed");
+        require(IERC20(token).transferFrom(msg.sender, address(this), amount), "Transfer failed");
         
         // Approve Aave Lending Pool to use the tokens
         IERC20(token).approve(address(pool), amount);
         pool.deposit(token, amount, address(this), amount);
-
-
         strategy.capitalAllocated+=amount;
-        strategy.balances[msg.sender] += amount;
+        strategyBalances[strategyID][msg.sender] += amount;
     }
 
     // function deposit(uint256 strategyID, address token, uint256 amount) external {
@@ -102,8 +108,8 @@ contract StrategyRegistry {
 
     function withdraw(address token, uint256 amount, uint256 strategyID) external{
         Strategy storage strategy = strategies[strategyID];
-        require(strategy.balances[msg.sender] >= amount, "Insufficient balance");
-        strategy.balances[msg.sender] -= amount;
+        require(strategyBalances[strategyID][msg.sender] >= amount, "Insufficient balance");
+        strategyBalances[strategyID][msg.sender] -= amount;
         strategy.capitalAllocated-=amount;
         pool.withdraw(token, amount, msg.sender);
     }
@@ -117,11 +123,6 @@ contract StrategyRegistry {
     //     //IPool(_getLendingPool()).withdraw(token, amount, msg.sender);
     // }
 
-    // whitelist strategist function that can be only changed by the owner of this contract
-    function whitelistStrategist(uint256 strategyID) external {
-        require(msg.sender == owner || msg.sender == strategyContract , "Only the owner can whitelist a strategist.");
-        _whitelistedStrategies.push(strategy);
-    }
 
 
     // // function that enables the a whitelised user to withdraw funds from the pool
@@ -157,7 +158,7 @@ contract StrategyRegistry {
 
 
     function registerStrategy(bytes32 hash, address asset1, address asset2, uint256 stake, address public_share_secret) external {
-        require(startBlock <= endBlock, "Invalid block range.");
+        // require(startBlock <= endBlock, "Invalid block range.");
 
         // Transfer the stake from the user to this contract
         IERC20(asset1).transferFrom(msg.sender, address(this), stake);
@@ -173,9 +174,11 @@ contract StrategyRegistry {
             asset1: asset1,
             asset2: asset2,
             stake: stake,
+            maxAllowedStrategyUse: 0,// TODO check
             creator: msg.sender,
             public_share_secret: public_share_secret,
-            lastExecuted: 0
+            lastExecuted: 0,
+            capitalAllocated: 0
         });
 
         // Add the new strategy to the list of strategies
@@ -191,8 +194,14 @@ contract StrategyRegistry {
             // address signer = ecrecover(ethSignedMessageHash, v, r, s);
             // require(signer == msg.sender, "Invalid signature.")
             Strategy storage strategy = strategies[strategyID];
-            strategy.registeredNodeRunner[msg.sender] = true;
+            strategyRegisteredNodeRunner[strategyID][msg.sender] = true;
     }
+    // // whitelist strategist function that can be only changed by the owner of this contract
+    // function whitelistStrategist(uint256 strategyID) external {
+    //     require(msg.sender == owner || msg.sender == strategyContract , "Only the owner can whitelist a strategist.");
+    //     _whitelistedStrategies.push(strategy);
+    // }
+
 
 
     function getStrategies() external view returns (uint256[] memory) {
@@ -203,7 +212,7 @@ contract StrategyRegistry {
         return strategies[strategyID];
     }
 
-    function runStrategy(uint256 nodeRunnerID, uint256 strategyID, uint256 tickLower, uint256 tickUpper, uint256 portionOfFunds0, uint256 portionOfFunds1) external {
+    function runStrategy(uint256 nodeRunnerID, uint256 strategyID, int24 tickLower, int24 tickUpper, uint256 portionOfFunds0, uint256 portionOfFunds1) external {
         Strategy memory strategy = strategies[strategyID];
         require(msg.sender == strategy.creator, "Only the creator can run this strategy.");
 
