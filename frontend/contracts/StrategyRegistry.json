@@ -163,17 +163,7 @@
         },
         {
           "internalType": "uint256",
-          "name": "startBlock",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "endBlock",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "stake",
+          "name": "stake", //-> do we need staake
           "type": "uint256"
         }
       ],
@@ -718,60 +708,24 @@
     "absolutePath": "src/Strategy.sol",
     "id": 26377,
     "exportedSymbols": {
-      "DataTypes": [
-        1199
-      ],
-      "DepositModule": [
-        26112
-      ],
-      "IERC165": [
-        25398
-      ],
-      "IERC20": [
-        25212
-      ],
-      "IERC721": [
-        25328
-      ],
-      "IERC721Enumerable": [
-        25359
-      ],
-      "IERC721Metadata": [
-        25386
-      ],
-      "IERC721Permit": [
-        25447
-      ],
-      "INonfungiblePositionManager": [
-        25646
-      ],
-      "IPeripheryImmutableState": [
-        25662
-      ],
-      "IPeripheryPayments": [
-        25688
-      ],
-      "IPool": [
-        638
-      ],
-      "IPoolAddressesProvider": [
-        847
-      ],
-      "IPoolInitializer": [
-        25707
-      ],
-      "ISwapRouter": [
-        25807
-      ],
-      "IUniswapV3SwapCallback": [
-        25412
-      ],
-      "PoolAddress": [
-        25904
-      ],
-      "StrategyRegistry": [
-        26376
-      ]
+      "DataTypes": [1199],
+      "DepositModule": [26112],
+      "IERC165": [25398],
+      "IERC20": [25212],
+      "IERC721": [25328],
+      "IERC721Enumerable": [25359],
+      "IERC721Metadata": [25386],
+      "IERC721Permit": [25447],
+      "INonfungiblePositionManager": [25646],
+      "IPeripheryImmutableState": [25662],
+      "IPeripheryPayments": [25688],
+      "IPool": [638],
+      "IPoolAddressesProvider": [847],
+      "IPoolInitializer": [25707],
+      "ISwapRouter": [25807],
+      "IUniswapV3SwapCallback": [25412],
+      "PoolAddress": [25904],
+      "StrategyRegistry": [26376]
     },
     "nodeType": "SourceUnit",
     "src": "32:5193:30",
@@ -781,12 +735,7 @@
         "nodeType": "PragmaDirective",
         "src": "32:24:30",
         "nodes": [],
-        "literals": [
-          "solidity",
-          "^",
-          "0.8",
-          ".15"
-        ]
+        "literals": ["solidity", "^", "0.8", ".15"]
       },
       {
         "id": 26115,
@@ -1827,10 +1776,7 @@
                       "id": 26205,
                       "name": "require",
                       "nodeType": "Identifier",
-                      "overloadedDeclarations": [
-                        -18,
-                        -18
-                      ],
+                      "overloadedDeclarations": [-18, -18],
                       "referencedDeclaration": -18,
                       "src": "1671:7:30",
                       "typeDescriptions": {
@@ -2052,9 +1998,7 @@
                   "src": "1798:61:30"
                 },
                 {
-                  "assignments": [
-                    26226
-                  ],
+                  "assignments": [26226],
                   "declarations": [
                     {
                       "constant": false,
@@ -2131,9 +2075,7 @@
                   "src": "1916:50:30"
                 },
                 {
-                  "assignments": [
-                    26232
-                  ],
+                  "assignments": [26232],
                   "declarations": [
                     {
                       "constant": false,
@@ -2210,9 +2152,7 @@
                   "src": "1976:46:30"
                 },
                 {
-                  "assignments": [
-                    26239
-                  ],
+                  "assignments": [26239],
                   "declarations": [
                     {
                       "constant": false,
@@ -3071,9 +3011,7 @@
               "nodes": [],
               "statements": [
                 {
-                  "assignments": [
-                    26310
-                  ],
+                  "assignments": [26310],
                   "declarations": [
                     {
                       "constant": false,
@@ -3256,10 +3194,7 @@
                       "id": 26315,
                       "name": "require",
                       "nodeType": "Identifier",
-                      "overloadedDeclarations": [
-                        -18,
-                        -18
-                      ],
+                      "overloadedDeclarations": [-18, -18],
                       "referencedDeclaration": -18,
                       "src": "3118:7:30",
                       "typeDescriptions": {
@@ -3287,9 +3222,7 @@
                   "src": "3118:82:30"
                 },
                 {
-                  "assignments": [
-                    26328
-                  ],
+                  "assignments": [26328],
                   "declarations": [
                     {
                       "constant": false,
@@ -4258,9 +4191,7 @@
         "contractDependencies": [],
         "contractKind": "contract",
         "fullyImplemented": true,
-        "linearizedBaseContracts": [
-          26376
-        ],
+        "linearizedBaseContracts": [26376],
         "name": "StrategyRegistry",
         "nameLocation": "274:16:30",
         "scope": 26377,
