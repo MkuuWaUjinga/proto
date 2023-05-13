@@ -12,7 +12,8 @@ contract StrategyRegistry {
     struct Strategy {
         uint256 strategyID;
         bytes32 hash;
-        address asset;
+        address asset1;
+        address asset2;
         uint256 startEpoch;
         uint256 endEpoch;
         uint256 stake;
@@ -51,11 +52,11 @@ contract StrategyRegistry {
         depositModule = _depositModule;
     }
 
-    function registerStrategy(bytes32 hash, address asset, uint256 startBlock, uint256 endBlock, uint256 stake) external {
+    function registerStrategy(bytes32 hash, address asset1, address asset2, uint256 startBlock, uint256 endBlock, uint256 stake) external {
         require(startBlock <= endBlock, "Invalid block range.");
 
         // Transfer the stake from the user to this contract
-        IERC20(asset).transferFrom(msg.sender, address(this), stake);
+        IERC20(asset1).transferFrom(msg.sender, address(this), stake);
 
         // Calculate the start and end epochs
         uint256 startEpoch = startBlock / BLOCKS_PER_EPOCH;
@@ -65,7 +66,8 @@ contract StrategyRegistry {
         Strategy memory newStrategy = Strategy({
             strategyID: strategiesID.length,
             hash: hash,
-            asset: asset,
+            asset1: asset1,
+            asset2: asset2,
             startEpoch: startEpoch,
             endEpoch: endEpoch,
             stake: stake,
@@ -88,7 +90,7 @@ contract StrategyRegistry {
         return strategies[strategyID];
     }
 
-    function runStrategy(uint256 strategyID) external {
+    function runStrategy(uint256 strategyID, uint256 tickLower, uint256 tickUpper, uint256 amount0Desired, uint256 amount1Desired, uint256 amount0Min, uint256 amount1Min) external {
         Strategy memory strategy = strategies[strategyID];
         require(msg.sender == strategy.creator, "Only the creator can run this strategy.");
 
@@ -96,8 +98,8 @@ contract StrategyRegistry {
 
         // Create a range order on Uniswap v3
         INonfungiblePositionManager.MintParams memory params = INonfungiblePositionManager.MintParams({
-            token0: address(stakingToken),
-            token1: strategy.asset,
+            token0: strategy.asset1,
+            token1: strategy.asset2,
             fee: 3000, // This will depend on your use case
             tickLower: -887220, // This will depend on your use case
             tickUpper: 887220, // This will depend on your use case
