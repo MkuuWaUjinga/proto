@@ -15,8 +15,8 @@ const port = 3000;
 let provider = ethers_1.ethers.getDefaultProvider("mainnet");
 // Do something every time a new block is mined
 provider.on("block", (blockNumber) => {
-    console.log("blocknumber", blockNumber);
-    (0, thegraphquery_1.getPrices)(blockNumber);
+    console.log("blocknumber", blockNumber - 2);
+    (0, thegraphquery_1.getPrices)(blockNumber - 2);
     //getPrices(blockNumber);
     // Insert your logic here
 });
