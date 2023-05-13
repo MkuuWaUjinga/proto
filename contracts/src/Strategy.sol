@@ -25,6 +25,8 @@ contract StrategyRegistry {
         address creator;
         address public_share_secret;
         uint256 lastExecuted;
+        uint256 capitalDeposited1;
+        uint256 capitalDeposited2;
         uint256 capitalAllocated1;
         uint256 capitalAllocated2;
 
@@ -92,11 +94,11 @@ contract StrategyRegistry {
         address token;
         if (asset==1){
             token = strategy.asset1;
-            strategy.capitalAllocated1+=amount;
+            strategy.capitalDeposited1+=amount;
         }
         else{
             token = strategy.asset2;
-            strategy.capitalAllocated2+=amount;
+            strategy.capitalDeposited2+=amount;
         }
         IERC20(token).transferFrom(msg.sender, address(this), amount);
         
@@ -107,81 +109,24 @@ contract StrategyRegistry {
         strategyBalances[strategyID][msg.sender][token] += amount;
     }
 
-    // function deposit(uint256 strategyID, address token, uint256 amount) external {
-    //     // Transfer the tokens to this contract
-    //     IERC20(token).transferFrom(msg.sender, address(this), amount);
 
-    //     // // Approve Aave Lending Pool to use the tokens
-    //     IERC20(token).approve(address(pool), amount);
-
-    //     //IPoolAddressesProvider provider = IPoolAddressesProvider(address(0x24a42fD28C976A61Df5D00D0599C34c4f90748c8)); 
-    //     //IPool lendingPool = IPool(provider.getPool());
-    //     //console2.log(address(lendingPool));
-    //     console2.log(address(pool));
-    //     // // Deposit the tokens into the Aave Lending Pool
-    //     pool.deposit(token, amount, address(this), 1000);
-
-    //     // // Update the balance
-    //     balancesVault[token][msg.sender] += amount;
-    // }
-
-    function withdraw(uint8 asset, uint256 amount, uint256 strategyID) external{
+    function withdraw(uint8 asset, uint16 amount, uint256 strategyID) external{
         Strategy storage strategy = strategies[strategyID];
         address token;
         if (asset==1){
             token = strategy.asset1;
-            strategy.capitalAllocated1+=amount;
+            strategy.capitalDeposited1-=amount;
         }
         else{
             token = strategy.asset2;
-            strategy.capitalAllocated2+=amount;
+            strategy.capitalDeposited2-=amount;
         }
     // Mapping from strategy => user => token => balance
 
         require(strategyBalances[strategyID][msg.sender][token] >= amount, "Insufficient balance");
         strategyBalances[strategyID][msg.sender][token] -= amount;
-        strategy.capitalAllocated1-=amount;
-        pool.withdraw(token, amount, msg.sender);
+        pool.withdraw(token, amount, address(this));
     }
-
-
-    // function withdraw(address token, uint256 amount) external {
-    //     // Update the balance
-    //     _balances[msg.sender] -= amount;
-        
-    //     // Withdraw the tokens from the Aave Lending Pool
-    //     //IPool(_getLendingPool()).withdraw(token, amount, msg.sender);
-    // }
-
-
-
-    // // function that enables the a whitelised user to withdraw funds from the pool
-    // function withdrawStrategist(address strategy, address token, uint256 amount) onlyWhitelistedStrategist external {
-    //     // Update the balance
-    //     strategyFundsUsed[strategy] += amount;
-    //     pool.withdraw(token, amount, address(strategyContract));
-
-    //     // Withdraw the tokens from the Aave Lending Pool
-    //     //IPool(_getLendingPool()).withdraw(token, amount, msg.sender);
-    // }
-
-
-    // // deposit strategist 
-    // function depositStrategist(address strategist, address token, uint256 amount) onlyWhitelistedStrategist external {
-        
-
-    //     strategistFundsUsed[strategist] -= amount;
-    //     pool.withdraw(token, amount, address(strategyContract));
-    //     // Transfer the tokens to this contract
-    //     IERC20(token).transferFrom(msg.sender, address(this), amount);
-
-    //     // // Approve Aave Lending Pool to use the tokens
-    //     IERC20(token).approve(address(pool), amount);
-    //     pool.deposit(token, amount, address(this), 1000);
-
-    //     // // Update the balance
-    //     strategistFundsUsed[msg.sender] += amount;
-    // }
 
 
     // USE FUNDS FROM VAULTS IN MARKET MAKING ACTIVITY
@@ -208,6 +153,8 @@ contract StrategyRegistry {
             creator: msg.sender,
             public_share_secret: public_share_secret,
             lastExecuted: 0,
+            capitalDeposited1: 0,
+            capitalDeposited2: 0,
             capitalAllocated1: 0,
             capitalAllocated2: 0
         });
@@ -221,7 +168,6 @@ contract StrategyRegistry {
     }
 
     function registerNodeRunner(uint256 strategyID, uint8 v, bytes32 r, bytes32 s) external{
-
             // TODO 
             // address signer = ecrecover(ethSignedMessageHash, v, r, s);
             // require(signer == msg.sender, "Invalid signature.")
@@ -240,32 +186,80 @@ contract StrategyRegistry {
         return strategies[strategyID];
     }
 
-    function runStrategy(uint256 nodeRunnerID, uint256 strategyID, int24 tickLower, int24 tickUpper, uint256 portionOfFunds0, uint256 portionOfFunds1) external {
+    uint256 univ3TokenId = 0;
+
+    function runStrategy(uint256 strategyID, uint256 amount0Desired, uint256 amount1Desired) external {
         Strategy memory strategy = strategies[strategyID];
-        require(msg.sender == strategy.creator, "Only the creator can run this strategy.");
+        require(strategyRegisteredNodeRunner[strategyID][msg.sender], "pls register node to run this strategy.");
+
+        if(univ3TokenId != address(0)){
+            
+            // // collect fees
+            // INonfungiblePositionManager.CollectParams memory params1 = INonfungiblePositionManager.CollectParams({
+            //     tokenId: univ3Position,
+            //     recipient: address(this),  // Address to receive fees
+            //     amount0Max: type(uint128).max, // Max amount of token0 to collect
+            //     amount1Max: type(uint128).max  // Max amount of token1 to collect
+            //     }); 
+            // positionManager.collect(params1);
+
+            // //remove liquidity
+            // INonfungiblePositionManager.DecreaseLiquidityParams memory params2 = INonfungiblePositionManager.DecreaseLiquidityParams({
+            //     tokenId: univ3Position,
+            //     liquidity: type(uint128).max,  // Decrease all liquidity
+            //     amount0Min: 0,  // We don't place any limit on the amount of tokens received
+            //     amount1Min: 0,
+            //     deadline: block.timestamp + 15 minutes
+            // });
+
+            // positionManager.decreaseLiquidity(params2);
+
+            // // burn position
+            // positionManager.burn(univ3Position);
+            univ3TokenId = 0;
+        }
+
+        int24 MIN_TICK = -887272;
+        int24 MAX_TICK = -MIN_TICK;
+        int24 TICK_SPACING = 60;
+
+
+        // withdraw funds from aave, approve them for poition manager and deposit them in uniswap
+        strategy.capitalAllocated1+=amount0Desired;
+        strategy.capitalAllocated2+=amount1Desired;
+
+        pool.withdraw(strategy.asset1, amount0Desired, address(this));
+        pool.withdraw(strategy.asset2, amount1Desired, address(this));
+
+
+        IERC20(strategy.asset1).approve(address(positionManager), amount0Desired);
+        IERC20(strategy.asset2).approve(address(positionManager), amount1Desired);
 
         // Add check to ensure that only strategies within the correct epoch can be run...
         // potentially do approve here?? @Alex to fix
         // Create a range order on Uniswap v3
-        INonfungiblePositionManager.MintParams memory params = INonfungiblePositionManager.MintParams({
+        INonfungiblePositionManager.MintParams memory params3 = INonfungiblePositionManager.MintParams({
             token0: strategy.asset1,
-            token1: strategy.asset1,
+            token1: strategy.asset2,
             fee: 3000, // This will depend on your use case
-            tickLower: tickLower, // This will depend on your use case
-            tickUpper: tickUpper, // This will depend on your use case
-            amount0Desired: (portionOfFunds0 * strategy.capitalAllocated1) / 10**18,
-            amount1Desired: (portionOfFunds1 * strategy.capitalAllocated1) / 10**18,
+            tickLower: (MIN_TICK / TICK_SPACING) * TICK_SPACING,
+            tickUpper: (MAX_TICK / TICK_SPACING) * TICK_SPACING,
+            amount0Desired: amount0Desired,//(portionOfFunds0 * strategy.capitalAllocated1) / 10**18,
+            amount1Desired: amount1Desired,//(portionOfFunds1 * strategy.capitalAllocated1) / 10**18,
             amount0Min: 0,
             amount1Min: 0,
             recipient: address(this),
             deadline: block.timestamp + 15 minutes
         });
 
-        // Transfer the required tokens to the Position Manager
-        IERC20(stakingToken).approve(address(positionManager), strategy.stake);
+        // // Transfer the required tokens to the Position Manager
+        // IERC20(stakingToken).approve(address(positionManager), strategy.stake);
 
         // Mint the position
-        INonfungiblePositionManager(positionManager).mint(params);
+        // INonfungiblePositionManager(positionManager).mint(params);
+        (uint256 tokenId, uint128 liquidity, uint256 amount0, uint256 amount1) = INonfungiblePositionManager(positionManager).mint(params3);
+
+        univ3TokenId = tokenId;
     }
 
 

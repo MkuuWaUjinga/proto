@@ -2,7 +2,7 @@
 #tr '\r' '\n' < .env > .env.unix
 source .env
 
-deployedStrategist=0x4Da8eF64Aa62405F8Fd294A32328042A0838c688
+deployedStrategist=0xcE9AD6246481fE89432739d7BE369E83986421D3
 
 
 # 
@@ -16,7 +16,7 @@ deployedStrategist=0x4Da8eF64Aa62405F8Fd294A32328042A0838c688
 # register the strategy first before depositing and give allowance to put up stake before
 #cast --format-bytes32-string "hello"
 cast send --rpc-url http://localhost:8545 --private-key $PRIVATE_KEY_STRATEGIST $addressUSDC "approve(address,uint256)" $deployedStrategist 1000000
-cast send --rpc-url http://localhost:8545 --private-key $PRIVATE_KEY_STRATEGIST $deployedStrategist "registerStrategy(bytes32,address,address,uint256,address)" 0x68656c6c6f000000000000000000000000000000000000000000000000000000 $addressUSDC $addressUSDC 1000 0x9b9E6E9c0C3578cAD98321eFb4e0651A507536CE
+cast send --rpc-url http://localhost:8545 --private-key $PRIVATE_KEY_STRATEGIST $deployedStrategist "registerStrategy(bytes32,address,address,uint256,address)" 0x68656c6c6f000000000000000000000000000000000000000000000000000000 $addressUSDC $addressBTC 1000 0x9b9E6E9c0C3578cAD98321eFb4e0651A507536CE
 # cast call $addressUSDC "balanceOf(address)(uint256)" $ADDRESS_STRATEGIST --rpc-url http://localhost:8545 
 
 cast call --rpc-url http://localhost:8545 --private-key $PRIVATE_KEY_USER $addressUSDC "approve(address,uint256)" $deployedStrategist 1000000
@@ -24,11 +24,19 @@ cast call --rpc-url http://localhost:8545 --private-key $PRIVATE_KEY_USER $addre
 # #allownace+deposit and withdraw funds and check that funds are 0 eventually
 cast send --rpc-url http://localhost:8545 --private-key $PRIVATE_KEY_USER $addressUSDC "approve(address,uint256)" $deployedStrategist 1000000
 cast send --rpc-url http://localhost:8545 --private-key $PRIVATE_KEY_USER $deployedStrategist "deposit(uint8,uint16,uint256)" 1 1000 0
-# #cast send --rpc-url http://localhost:8545 --private-key $PRIVATE_KEY $deployedStrategist "withdraw(address,uint256,uint256)" $addressUSDC 1000 0
+#cast send --rpc-url http://localhost:8545 --private-key $PRIVATE_KEY_USER $deployedStrategist "withdraw(uint8,uint16,uint256)" 1 1000 0
 
 # # check aToken balance for usdc
 cast call 0x98C23E9d8f34FEFb1B7BD6a91B7FF122F4e16F5c "balanceOf(address)(uint256)" $deployedStrategist --rpc-url http://localhost:8545
 
 
+cast send --rpc-url http://localhost:8545 --private-key $PRIVATE_KEY_RUNNER $deployedStrategist "registerNodeRunner(uint256,uint8,bytes32,bytes32)" 0 1 0x68656c6c6f000000000000000000000000000000000000000000000000000000 0x68656c6c6f000000000000000000000000000000000000000000000000000000
+
+
+cast send --rpc-url http://localhost:8545 --private-key $PRIVATE_KEY_RUNNER $deployedStrategist "runStrategy(uint256,uint256,uint256)" 0 1000 1000 
+
+
+
+runStrategy(uint256 nodeRunnerID, uint256 strategyID, int24 tickLower, int24 tickUpper, uint256 amount0Desired, uint256 amount1Desired)
 #cast call 0x0B3b0376e52fBD02892878C7792D63b30D4Ac76B "getStrategies()"  --rpc-url http://localhost:8545
 
