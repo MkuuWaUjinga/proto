@@ -27,13 +27,39 @@ contract DepositModule {
 
     address [] _whitelistedStrategists;
 
+    // mapping that stores for every strategist the amounts of funds used
+    mapping(address => uint256) public strategistFundsUsed;
+
     address owner;
+    address strategyContract;
+    
+
+
+    // modifier that checks whether calller is whitelsited
+    modifier onlyWhitelistedStrategist() {
+        bool isWhitelisted = false;
+        for (uint i = 0; i < _whitelistedStrategists.length; i++) {
+            if (_whitelistedStrategists[i] == msg.sender) {
+                isWhitelisted = true;
+            }
+        }
+        require(isWhitelisted, "Only whitelisted strategist can call this function.");
+        _;
+    }
+
 
     // constructor that sets owner
     constructor() {
         // Approve Aave Lending Pool to use the tokens
         owner = msg.sender;
         }
+
+    // register strategy contract
+    function registerStrategyContract(address _strategyContract) external {
+        require(msg.sender == owner, "Only owner can register strategy contract.");
+        strategyContract = _strategyContract;
+    }
+
 
     function deposit(address token, uint256 amount) external {
         // Transfer the tokens to this contract
@@ -56,7 +82,7 @@ contract DepositModule {
     function withdraw(address token, uint256 amount) external {
         // Update the balance
         _balances[msg.sender] -= amount;
-        pool.withdraw(token, amount, address(this));
+        pool.withdraw(token, amount, msg.sender);
 
         // Withdraw the tokens from the Aave Lending Pool
         //IPool(_getLendingPool()).withdraw(token, amount, msg.sender);
@@ -64,20 +90,44 @@ contract DepositModule {
 
     // whitelist strategist function that can be only changed by the owner of this contract
     function whitelistStrategist(address strategist) external {
-        require(msg.sender == owner, "Only the owner can whitelist a strategist.");
+        require(msg.sender == owner || msg.sender == strategyContract , "Only the owner can whitelist a strategist.");
         _whitelistedStrategists.push(strategist);
     }
 
+
+
     // function that enables the a whitelised user to withdraw funds from the pool
-    function withdrawStrategy(address token, uint256 amount, address user) external {
-        require(msg.sender, "Insufficient balance.");
+    function withdrawStrategist(address strategist, address token, uint256 amount) onlyWhitelistedStrategist external {
         // Update the balance
-        _balances[user] -= amount;
-        pool.withdraw(token, amount, user);
+        strategistFundsUsed[strategist] += amount;
+        pool.withdraw(token, amount, address(strategyContract));
 
         // Withdraw the tokens from the Aave Lending Pool
         //IPool(_getLendingPool()).withdraw(token, amount, msg.sender);
     }
+
+
+    // deposit strategist 
+    function depositStrategist(address strategist, address token, uint256 amount) onlyWhitelistedStrategist external {
+        
+
+        strategistFundsUsed[strategist] -= amount;
+        pool.withdraw(token, amount, address(strategyContract));
+
+        
+        // Transfer the tokens to this contract
+        IERC20(token).transferFrom(msg.sender, address(this), amount);
+
+        // // Approve Aave Lending Pool to use the tokens
+        IERC20(token).approve(address(pool), amount);
+
+        pool.deposit(token, amount, address(this), 1000);
+
+        // // Update the balance
+        strategistFundsUsed[msg.sender] += amount;
+    }
+
+
 
 
     function balanceOf(address token, address account) external view returns (uint256) {

@@ -23,6 +23,9 @@ contract Deploy is Script {
 
         DepositModule depositModule = new DepositModule();
         StrategyRegistry strategyRegistry = new StrategyRegistry(token, uniPositionManager, uniSwapRouter, depositModule);
+
+        depositModule.registerStrategyContract(address(strategyRegistry));
+        
         console2.logAddress(address(strategyRegistry));
         vm.stopBroadcast();
     }
