@@ -174,76 +174,76 @@ contract StrategyRegistry {
 
     function runStrategy(uint256 strategyID, int24 minTick, int24 maxTick, uint256 amount0Desired, uint256 amount1Desired) external {
         Strategy memory strategy = strategies[strategyID];
-        // require(strategyRegisteredNodeRunner[strategyID][msg.sender], "pls register node to run this strategy.");
+        require(strategyRegisteredNodeRunner[strategyID][msg.sender], "pls register node to run this strategy.");
 
-        // if(univ3TokenId != 0){
+        if(univ3TokenId != 0){
             
-        //     // // collect fees
-        //     INonfungiblePositionManager.CollectParams memory params1 = INonfungiblePositionManager.CollectParams({
-        //         tokenId: univ3TokenId,
-        //         recipient: address(this),  // Address to receive fees
-        //         amount0Max: type(uint128).max, // Max amount of token0 to collect
-        //         amount1Max: type(uint128).max  // Max amount of token1 to collect
-        //         }); 
-        //     INonfungiblePositionManager(positionManager).collect(params1);
+            // // collect fees
+            INonfungiblePositionManager.CollectParams memory params1 = INonfungiblePositionManager.CollectParams({
+                tokenId: univ3TokenId,
+                recipient: address(this),  // Address to receive fees
+                amount0Max: type(uint128).max, // Max amount of token0 to collect
+                amount1Max: type(uint128).max  // Max amount of token1 to collect
+                }); 
+            INonfungiblePositionManager(positionManager).collect(params1);
 
-        //     //remove liquidity
-        //     INonfungiblePositionManager.DecreaseLiquidityParams memory params2 = INonfungiblePositionManager.DecreaseLiquidityParams({
-        //         tokenId: univ3TokenId,
-        //         liquidity: type(uint128).max,  // Decrease all liquidity
-        //         amount0Min: 0,  // We don't place any limit on the amount of tokens received
-        //         amount1Min: 0,
-        //         deadline: block.timestamp + 15 minutes
-        //     });
+            //remove liquidity
+            INonfungiblePositionManager.DecreaseLiquidityParams memory params2 = INonfungiblePositionManager.DecreaseLiquidityParams({
+                tokenId: univ3TokenId,
+                liquidity: type(uint128).max,  // Decrease all liquidity
+                amount0Min: 0,  // We don't place any limit on the amount of tokens received
+                amount1Min: 0,
+                deadline: block.timestamp + 15 minutes
+            });
 
-        //     INonfungiblePositionManager(positionManager).decreaseLiquidity(params2);
+            INonfungiblePositionManager(positionManager).decreaseLiquidity(params2);
 
-        //     // // burn position
-        //     INonfungiblePositionManager(positionManager).burn(univ3TokenId);
-        //     univ3TokenId = 0;
-        // }
+            // // burn position
+            INonfungiblePositionManager(positionManager).burn(univ3TokenId);
+            univ3TokenId = 0;
+        }
 
-        // // int24 MIN_TICK = -887272;
-        // // int24 MAX_TICK = -MIN_TICK;
-        // int24 TICK_SPACING = 60;
-
-
-        // // withdraw funds from aave, approve them for poition manager and deposit them in uniswap
-        // strategy.capitalAllocated1+=amount0Desired;
-        // strategy.capitalAllocated2+=amount1Desired;
-
-        // pool.withdraw(strategy.asset1, amount0Desired, address(this));
-        // pool.withdraw(strategy.asset2, amount1Desired, address(this));
+        // int24 MIN_TICK = -887272;
+        // int24 MAX_TICK = -MIN_TICK;
+        int24 TICK_SPACING = 60;
 
 
-        // IERC20(strategy.asset1).approve(address(positionManager), amount0Desired);
-        // IERC20(strategy.asset2).approve(address(positionManager), amount1Desired);
+        // withdraw funds from aave, approve them for poition manager and deposit them in uniswap
+        strategy.capitalAllocated1+=amount0Desired;
+        strategy.capitalAllocated2+=amount1Desired;
 
-        // // Add check to ensure that only strategies within the correct epoch can be run...
-        // // potentially do approve here?? @Alex to fix
-        // // Create a range order on Uniswap v3
-        // INonfungiblePositionManager.MintParams memory params3 = INonfungiblePositionManager.MintParams({
-        //     token0: strategy.asset1,
-        //     token1: strategy.asset2,
-        //     fee: 3000, // This will depend on your use case
-        //     tickLower: (minTick / TICK_SPACING) * TICK_SPACING,
-        //     tickUpper: (maxTick / TICK_SPACING) * TICK_SPACING,
-        //     amount0Desired: amount0Desired,//(portionOfFunds0 * strategy.capitalAllocated1) / 10**18,
-        //     amount1Desired: amount1Desired,//(portionOfFunds1 * strategy.capitalAllocated1) / 10**18,
-        //     amount0Min: 0,
-        //     amount1Min: 0,
-        //     recipient: address(this),
-        //     deadline: block.timestamp + 15 minutes
-        // });
+        pool.withdraw(strategy.asset1, amount0Desired, address(this));
+        pool.withdraw(strategy.asset2, amount1Desired, address(this));
 
-        // // // Transfer the required tokens to the Position Manager
-        // // IERC20(stakingToken).approve(address(positionManager), strategy.stake);
 
-        // // Mint the position
-        // // INonfungiblePositionManager(positionManager).mint(params);
-        // (uint256 tokenId, uint128 liquidity, uint256 amount0, uint256 amount1) = INonfungiblePositionManager(positionManager).mint(params3);
+        IERC20(strategy.asset1).approve(address(positionManager), amount0Desired);
+        IERC20(strategy.asset2).approve(address(positionManager), amount1Desired);
 
-        // univ3TokenId = tokenId;
+        // Add check to ensure that only strategies within the correct epoch can be run...
+        // potentially do approve here?? @Alex to fix
+        // Create a range order on Uniswap v3
+        INonfungiblePositionManager.MintParams memory params3 = INonfungiblePositionManager.MintParams({
+            token0: strategy.asset1,
+            token1: strategy.asset2,
+            fee: 3000, // This will depend on your use case
+            tickLower: (minTick / TICK_SPACING) * TICK_SPACING,
+            tickUpper: (maxTick / TICK_SPACING) * TICK_SPACING,
+            amount0Desired: amount0Desired,//(portionOfFunds0 * strategy.capitalAllocated1) / 10**18,
+            amount1Desired: amount1Desired,//(portionOfFunds1 * strategy.capitalAllocated1) / 10**18,
+            amount0Min: 0,
+            amount1Min: 0,
+            recipient: address(this),
+            deadline: block.timestamp + 15 minutes
+        });
+
+        // // Transfer the required tokens to the Position Manager
+        // IERC20(stakingToken).approve(address(positionManager), strategy.stake);
+
+        // Mint the position
+        // INonfungiblePositionManager(positionManager).mint(params);
+        (uint256 tokenId, uint128 liquidity, uint256 amount0, uint256 amount1) = INonfungiblePositionManager(positionManager).mint(params3);
+
+        univ3TokenId = tokenId;
     }
 
 }
