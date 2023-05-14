@@ -1,7 +1,7 @@
 {
   "transactions": [
     {
-      "hash": "0x8aed4a60cfda280ad544a94793de3468dd7bd0c924c84d56fe6db9dd1f93ed62",
+      "hash": "0x3b77cd60f82d5c83ed60f59a6224ac6884eeaa7b39561e873063a0ccde687e9e",
       "transactionType": "CREATE",
       "contractName": "StrategyRegistry",
       "contractAddress": "0x0a3aa4174D27fbd3c7B9ce000Cb200B1A1563334",
@@ -24,29 +24,14 @@
       "isFixedGasLimit": false
     }
   ],
-  "receipts": [
-    {
-      "transactionHash": "0x8aed4a60cfda280ad544a94793de3468dd7bd0c924c84d56fe6db9dd1f93ed62",
-      "transactionIndex": "0x0",
-      "blockHash": "0x0664edcb3bbf47e246c1d82b78d561a0cac310c7c81e615ae24a6e97931f95e8",
-      "blockNumber": "0x1074924",
-      "from": "0x9b9E6E9c0C3578cAD98321eFb4e0651A507536CE",
-      "to": null,
-      "cumulativeGasUsed": "0xf84ec",
-      "gasUsed": "0xf84ec",
-      "contractAddress": "0x0a3aa4174D27fbd3c7B9ce000Cb200B1A1563334",
-      "logs": [],
-      "status": "0x1",
-      "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
-      "type": "0x2",
-      "effectiveGasPrice": "0xc433534e"
-    }
-  ],
+  "receipts": [],
   "libraries": [],
-  "pending": [],
+  "pending": [
+    "0x3b77cd60f82d5c83ed60f59a6224ac6884eeaa7b39561e873063a0ccde687e9e"
+  ],
   "path": "/home/floydd34dsh0t/Documents/Blockchain/Random/ethlisbon/proto/contracts/broadcast/Deploy.s.sol/1337/run-latest.json",
   "returns": {},
-  "timestamp": 1684024908,
+  "timestamp": 1684020863,
   "chain": 1337,
   "multi": false,
   "commit": "0d031cb4"

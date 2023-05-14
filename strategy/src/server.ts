@@ -7,7 +7,7 @@ import StrategyRegistry from "./contracts/StrategyRegistry.json";
 dotenv.config();
 // Initiate Express App
 const app = express();
-const port = 3000;
+const port = 4000;
 // Set up the provider
 let provider = new ethers.providers.JsonRpcProvider("http://localhost:8545");
 const contractAddress = "0x0a3aa4174D27fbd3c7B9ce000Cb200B1A1563334";

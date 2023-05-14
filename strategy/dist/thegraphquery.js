@@ -25,6 +25,7 @@ async function getPrices(blockNumber) {
     console.log("Retrieving the price of USDC and Apecoin and doing statistical analysis");
     const tokenQuery = `query {usdcToken: token(id: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48", block: {number: ${blockNumber}}) {id lastPriceUSD} apecoinToken: token(id: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2", block: { number: ${blockNumber}}) {id lastPriceUSD}}`;
     const tokenData = await makeGraphRequest(tokenQuery);
+    // console.log(tokenData);
     const usdcPrice = (_a = tokenData.data.usdcToken) === null || _a === void 0 ? void 0 : _a.lastPriceUSD;
     const apecoinPrice = (_b = tokenData.data.apecoinToken) === null || _b === void 0 ? void 0 : _b.lastPriceUSD;
     console.log(`USDC Price: ${usdcPrice}`);

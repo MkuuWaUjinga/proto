@@ -52,7 +52,7 @@ const StrategiesTable: React.FC = () => {
     const tx1 = await contract.getStrategies();
     console.log("txt1", tx1);
     console.log(
-      tx1.map((strategy: Strategy) => {
+      tx1.map((strategy: any) => {
         return {
           id: strategy.id,
           hash: strategy.hash,
@@ -64,10 +64,10 @@ const StrategiesTable: React.FC = () => {
           public_share_secret: strategy.public_share_secret,
           lastExecuted: strategy.lastExecuted,
           capitalAllocated1: ethers.utils.formatEther(
-            BigNumber.from(strategy.capitalAllocated1).toString()
+            BigNumber.from(strategy.capitalDeposited1).toString()
           ),
           capitalAllocated2: ethers.utils.formatEther(
-            BigNumber.from(strategy.capitalAllocated1).toString()
+            BigNumber.from(strategy.capitalDeposited2).toString()
           ),
           selectedAsset: strategy.selectedAsset,
         };
@@ -85,12 +85,12 @@ const StrategiesTable: React.FC = () => {
           creator: strategy.creator,
           public_share_secret: strategy.public_share_secret,
           lastExecuted: strategy.lastExecuted,
-          capitalAllocated1: ethers.utils.formatEther(
-            BigNumber.from(strategy.capitalAllocated1).toString()
-          ),
-          capitalAllocated2: ethers.utils.formatEther(
-            BigNumber.from(strategy.capitalAllocated1).toString()
-          ),
+          capitalAllocated1: BigNumber.from(
+            strategy.capitalDeposited1
+          ).toString(),
+          capitalAllocated2: BigNumber.from(
+            strategy.capitalDeposited2
+          ).toString(),
           selectedAsset: strategy.selectedAsset,
         };
       })

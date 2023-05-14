@@ -11,14 +11,15 @@ const StrategyRegistry_json_1 = __importDefault(require("./contracts/StrategyReg
 dotenv_1.default.config();
 // Initiate Express App
 const app = (0, express_1.default)();
-const port = 3000;
+const port = 4000;
 // Set up the provider
 let provider = new ethers_1.ethers.providers.JsonRpcProvider("http://localhost:8545");
-const contractAddress = "0x0a3aa4174d27fbd3c7b9ce000cb200b1a1563334";
+const contractAddress = "0x0a3aa4174D27fbd3c7B9ce000Cb200B1A1563334";
 // this assumes that the noderunner is already registered
 provider.on("block", async (blockNumber) => {
     console.log("blocknumber", blockNumber - 2);
-    const prices = await (0, thegraphquery_1.getPrices)(blockNumber - 2);
+    // TODO block number hardcoded bc of foundry
+    const prices = await (0, thegraphquery_1.getPrices)(17254047 - 2);
     const beneficiary = (0, thegraphquery_1.getNodeRunnerAddress)();
     console.log("Fetched address of node runner from local server: " + beneficiary);
     //execute recommendations
@@ -32,19 +33,19 @@ provider.on("block", async (blockNumber) => {
     // Create a new contract instance
     const contract = new ethers_1.ethers.Contract(contractAddress, StrategyRegistry_json_1.default.abi, wallet);
     // Replace these values with your actual inputs
-    const strategyID = 1;
+    const strategyID = 0;
     const tickLower = ethers_1.ethers.utils.parseUnits((prices.apecoinPrice * 0.9).toFixed(0), "wei");
     const tickUpper = ethers_1.ethers.utils.parseUnits((prices.apecoinPrice * 1.1).toFixed(0), "wei");
+    const tx = await contract.registerNodeRunner(strategyID, 1, ethers_1.ethers.utils.formatBytes32String("r"), ethers_1.ethers.utils.formatBytes32String("s"));
+    await tx.wait();
     async function runStrategy() {
         try {
             const tx1 = await contract.getStrategyByID(strategyID);
-            console.log("tx1", tx1);
-            const txResult = await tx1.wait();
-            console.log("txresult", txResult);
-            const amount0Desired = ethers_1.ethers.utils.parseUnits("1", "wei");
-            const amount1Desired = ethers_1.ethers.utils.parseUnits("1", "wei");
+            const amount0Desired = ethers_1.ethers.utils.parseUnits((tx1.capitalAllocated1 - tx1.capitalDeposited1).toString(), "wei");
+            const amount1Desired = ethers_1.ethers.utils.parseUnits((tx1.capitalAllocated2 - tx1.capitalDeposited2).toString(), "wei");
+            console.log("--------- Running strategy ----------");
             const tx = await contract.runStrategy(strategyID, tickLower, tickUpper, amount0Desired, amount1Desired);
-            console.log("Transaction sent: ", tx.hash);
+            console.log("Transaction sent: ", JSON.parse(JSON.stringify(tx.hash)));
             await tx.wait();
             console.log("Transaction completed");
         }
@@ -52,7 +53,7 @@ provider.on("block", async (blockNumber) => {
             console.log("Error: ", error);
         }
     }
-    runStrategy();
+    await runStrategy();
 });
 app.get("/", (req, res) => {
     res.send("Hello World!");

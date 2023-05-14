@@ -66,7 +66,7 @@ const DepositModal: React.FC<DepositModalProps> = ({
         address: strategyAddress,
         abi: StrategyRegistry.abi,
         functionName: "deposit",
-        args: [strategy.selectedAsset, Number(amount) * 10 ** 6, strategy.id],
+        args: [strategy.selectedAsset, Number(amount), strategy.id],
       });
       const tx = await writeContract(config);
       toast({
